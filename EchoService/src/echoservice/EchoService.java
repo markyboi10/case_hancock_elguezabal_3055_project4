@@ -1,16 +1,45 @@
 package echoservice;
 
-/**
- *
- * @author willi
- */
-public class EchoService {
+import java.net.Socket;
+import java.net.ServerSocket;
+import java.util.Scanner;
+import java.io.PrintWriter;
+import java.io.IOException;
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
+public class EchoService {
+  public static void main(String[] args)
+  {
+    try
+    {
+      ServerSocket server = new ServerSocket(5000);
+
+      // Loop forever handing connections.
+      while (true)
+      {
+        // Wait for a connection.
+        Socket sock = server.accept();
+
+        System.out.println("Connection received.");
+
+        // Setup the streams for use.
+        Scanner recv = new Scanner(sock.getInputStream());
+        PrintWriter send = new PrintWriter(sock.getOutputStream(), true);
+
+        // Get the line from the client.
+        String line = recv.nextLine();
+        System.out.println("Client said: " + line);
+
+        // Echo the line back.
+        send.println(line);
+
+        // Close the connection.
+        sock.close();
+      }
     }
-    
+    catch(IOException ioe)
+    {
+      ioe.printStackTrace();
+    }
+  }
+
 }
