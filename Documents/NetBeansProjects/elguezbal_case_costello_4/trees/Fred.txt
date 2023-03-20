@@ -1,0 +1,33 @@
+Sam Jones
+Fred Jones
+Sara Jones
+Cynthia C. Jones
+Deanna Jones
+Carla Jones
+Sandra Erickson
+Paul Erickson
+Pauline Erickson
+Justin Erickson
+Amelia Smith
+Linda Erickson
+Jessica Erickson
+Matt
+
+Sam Jones,marriedto,Sara Jones
+Cynthia C. Jones,marriedto,Fred Jones
+Cynthia C. Jones,parentof,Sam Jones
+Cynthia C. Jones,parentof,Carla Jones
+Cynthia C. Jones,parentof,Sandra Erickson
+Fred Jones,parentof,Sam Jones
+Fred Jones,parentof,Carla Jones
+Fred Jones,parentof,Sandra Erickson
+Sandra Erickson,marriedto,Paul Erickson
+Sandra Erickson,parentof,Pauline Erickson
+Paul Erickson,parentof,Pauline Erickson
+Paul Erickson,parentof,Justin Erickson
+Justin Erickson,marriedto,Jessica Erickson
+Justin Erickson,parentof,Linda Erickson
+Jessica Erickson,parentof,Linda Erickson
+Linda Erickson,parentof,Matt
+Matt,parentof,Sam Jones
+Amelia Smith,parentof,Justin Erickson

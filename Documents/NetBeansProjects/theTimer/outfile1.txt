@@ -1,0 +1,7 @@
+The value of timer is: 0
+The value of timer is: 86399
+myClock: The value of timer is: 2
+yourClock: The value of timer is: 0
+myClock is zero: false
+myClock is zero: true
+myClock's current time is: 0
