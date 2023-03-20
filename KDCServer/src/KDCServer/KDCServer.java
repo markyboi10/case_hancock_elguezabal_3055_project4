@@ -2,13 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
-package sso_service;
+package KDCServer;
 
 /**
  *
  * @author Mark Case
  */
-public class SSO_Service {
+public class KDCServer {
 
     /**
      * @param args the command line arguments
