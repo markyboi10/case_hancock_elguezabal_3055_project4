@@ -3,3 +3,7 @@
 /KDCServer/build/
 /SSOClient/nbproject/private/
 /EchoService/nbproject/private/
+/SSOClient/build/
+/EchoService/dist/
+/EchoService/build/
+/SSOClient/dist/
