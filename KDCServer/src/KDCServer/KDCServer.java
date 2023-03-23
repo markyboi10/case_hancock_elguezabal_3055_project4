@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import merrimackutil.util.NonceCache;
 
 public class KDCServer {
 
@@ -44,10 +45,9 @@ public class KDCServer {
                 Scanner recv = new Scanner(sock.getInputStream());
                 PrintWriter send = new PrintWriter(sock.getOutputStream(), true);
 
-                // Random nonce         
-                SecureRandom random = new SecureRandom();
-                byte[] nonceBytes = new byte[32];
-                random.nextBytes(nonceBytes);
+                // Random nonce       
+                NonceCache nc = new NonceCache(32, 30);
+                byte[] nonceBytes = nc.getNonce();
                 String nonce = Base64.getEncoder().encodeToString(nonceBytes);
                 
                 // Get the username line from the client.
