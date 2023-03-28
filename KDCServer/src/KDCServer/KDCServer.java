@@ -22,13 +22,36 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
+import merrimackutil.cli.LongOption;
+import merrimackutil.cli.OptionParser;
 import merrimackutil.util.NonceCache;
+import merrimackutil.util.Tuple;
 
 public class KDCServer {
 
     private static String[] userAndPass = {"Alice", "123321"};
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
+        OptionParser op = new OptionParser(args);
+        LongOption[] ar = new LongOption[2];
+        ar[0] = new LongOption("config", true, 'c');
+        ar[1] = new LongOption("help", false, 'h');
+        op.setLongOpts(ar);
+        op.setOptString("hc:");
+        Tuple<Character,String> opt = op.getLongOpt(false);
+        if (opt == null || Objects.equals(opt.getFirst(), 'h')) {
+            System.out.println("usage:\n"
+                    + "kdcd\n"
+                    + " kdcd --config <configfile>\n"
+                    + " kdcd --help\n"
+                    + "options:\n"
+                    + " -c, --config Set the config file.\n"
+                    + " -h, --help Display the help.");
+            System.exit(0);
+        } else if (Objects.equals(opt.getFirst(), 'c')) {
+            //load config
+        }
         System.out.println(Arrays.toString(userAndPass));
  
         try {
