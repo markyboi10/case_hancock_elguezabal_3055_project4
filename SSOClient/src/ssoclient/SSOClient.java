@@ -9,12 +9,35 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import merrimackutil.cli.LongOption;
+import merrimackutil.cli.OptionParser;
+import merrimackutil.util.Tuple;
 
 public class SSOClient {
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
+        OptionParser op = new OptionParser(args);
+        LongOption[] ar = new LongOption[2];
+        ar[0] = new LongOption("hosts", true, 'h');
+        ar[1] = new LongOption("user", true, 'u');
+        ar[1] = new LongOption("service", true, 's');
+        op.setLongOpts(ar);
+        Tuple<Character, String> opt = op.getLongOpt(false);
+        if (opt == null) {
+            System.out.println("usage:\n"
+                    + "   client --hosts <configfile> --user <user> --service <service>\n"
+                    + "   client --user <user> --service <service>\n"
+                    + "options:\n"
+                    + "   -h, --hosts Set the hosts file.\n"
+                    + "   -u, --user The user name.\n"
+                    + "   -s, --service The name of the service");
+            System.exit(0);
+        } else if (Objects.equals(opt.getFirst(), 'h')) {
+            //load hosts config
+        }
         Scanner scan = new Scanner(System.in);
         Socket sock;
         Scanner recv = null;
@@ -41,11 +64,10 @@ public class SSOClient {
         // Send username
         send.println(msg);
 
-
         // KDC checks username validity and if valid, demands password and gives a nonce
         String recvMsg = recv.nextLine();
         System.out.println("Server Said: " + "\n" + recvMsg);
-        
+
         // Extract nonce
         String ExtractedNonce = "";
         Pattern pattern = Pattern.compile("nonce is: (\\S+)");
@@ -55,7 +77,7 @@ public class SSOClient {
         } else {
             System.exit(0);
         }
-        
+
         // Client sends hashed password and nonce
         String msg2 = scan.nextLine();
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
