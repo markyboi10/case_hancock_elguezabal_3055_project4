@@ -39,6 +39,21 @@ public class Ticket implements Packet, JSONSerializable {
         this.eSKey = eSKey;
     }
     
+    public Ticket(long createTime, long validityTime, String uName, String sName) {
+        this.createTime = System.currentTimeMillis();
+        this.validityTime = validityTime;
+        this.uName = uName;
+        this.sName = sName;
+    }
+
+    public void setIv(byte[] iv) {
+        this.iv = iv;
+    }
+
+    public void seteSKey(byte[] eSKey) {
+        this.eSKey = eSKey;
+    }
+    
     /**
      * Converts a JSONObject into a ticket object
      * @param packet byte[] of information representing this packet
