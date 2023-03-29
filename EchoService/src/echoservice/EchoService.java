@@ -1,18 +1,23 @@
 package echoservice;
 
+import echoservice.config.Config;
+import java.io.FileNotFoundException;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.util.Objects;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
 
 public class EchoService {
+    
+    private static Config config;  
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, InvalidObjectException {
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
         ar[0] = new LongOption("config", true, 'c');
@@ -30,10 +35,10 @@ public class EchoService {
                     + " -h, --help Display the help.");
             System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'c')) {
-            //load config
+            config = new Config(opt.getSecond()); //load config
         }
         try {
-            ServerSocket server = new ServerSocket(5000);
+            ServerSocket server = new ServerSocket(config.getPort());
 
             // Loop forever handing connections.
             while (true) {

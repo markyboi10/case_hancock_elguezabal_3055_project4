@@ -1,4 +1,3 @@
-
 package KDCServer;
 
 import java.io.InvalidObjectException;
@@ -77,14 +76,14 @@ public class Ticket implements Packet, JSONSerializable {
             tmp = (JSONObject)obj;
             
             if (tmp.containsKey("createTime"))
-              this.createTime = (Long) tmp.get("createTime");
+              this.createTime = Long.parseLong(tmp.getString("createTime"));
             else
-              throw new InvalidObjectException("Expected an Ticket object -- createTime (long) expected.");
+              throw new InvalidObjectException("Expected an Ticket object -- createTime (String --> Long) expected.");
             
             if (tmp.containsKey("validityTime"))
-              this.validityTime = (Long) tmp.get("validityTime");
+              this.validityTime = Long.parseLong(tmp.getString("validityTime"));
             else
-              throw new InvalidObjectException("Expected an Ticket object -- validityTime (Long) expected.");
+              throw new InvalidObjectException("Expected an Ticket object -- validityTime (String --> Long) expected.");
             
             if (tmp.containsKey("uName"))
               this.uName = tmp.getString("uName");
@@ -123,8 +122,8 @@ public class Ticket implements Packet, JSONSerializable {
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
         
-        object.put("createTime", this.createTime);
-        object.put("validityTime", this.validityTime);
+        object.put("createTime", ""+this.createTime);
+        object.put("validityTime", ""+this.validityTime);
         object.put("uName", this.uName);
         object.put("sName", this.sName);
         object.put("iv", Base64.getEncoder().encode(this.iv));
