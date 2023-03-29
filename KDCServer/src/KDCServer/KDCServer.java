@@ -36,9 +36,9 @@ public class KDCServer {
     private static String[] userAndPass = {"Alice", "123321"};
 
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
-    private static File secretsFile = new File("C:\\Users\\MarkC\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4-master\\kdc-config\\secrets.json");
-    private static File hostsFile = new File("C:\\Users\\MarkC\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4-master\\hosts.json");
-    
+    private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
+    private static File hostsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\hosts.json");
+
     public static JsonNode JSONSecrets() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(secretsFile);
@@ -46,8 +46,8 @@ public class KDCServer {
         return secretsNode;
 
     }
-    
-        public static JsonNode JSONHosts() throws IOException {
+
+    public static JsonNode JSONHosts() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(hostsFile);
         JsonNode hostsNode = rootNode.get("hosts");
@@ -55,15 +55,10 @@ public class KDCServer {
 
     }
 
-
-
-        //System.out.println(JSON().toString());
-    
-   // private static Config config;
-
+    //System.out.println(JSON().toString());
+    // private static Config config;
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
-        
-        
+
 //        OptionParser op = new OptionParser(args);
 //        LongOption[] ar = new LongOption[2];
 //        ar[0] = new LongOption("config", true, 'c');
@@ -84,8 +79,6 @@ public class KDCServer {
 //            // Initialize config
 //            config = new Config(opt.getSecond());
 //        }
-       
-
         String host = null;
         int port = 0;
 
@@ -97,9 +90,9 @@ public class KDCServer {
                 port = 5000;
                 // send.println("Enter your password below. Yout nonce is: " + nonce);
                 System.out.println(host);
-            } 
+            }
         }
-        
+
         try {
             System.out.println(port);
 //            ServerSocket server = new ServerSocket(config.getPort());
@@ -120,30 +113,33 @@ public class KDCServer {
                 NonceCache nc = new NonceCache(32, 30);
                 byte[] nonceBytes = nc.getNonce();
                 String nonce = Base64.getEncoder().encodeToString(nonceBytes);
-                
+
                 // Get the username line from the client.
                 String line = recv.nextLine();
 
                 // Check if user exists and demand password + send nonce if correct,
                 // error otherwise
-                
                 for (JsonNode secretNode : JSONSecrets()) {
                     String userName = secretNode.get("user").asText();
                     // Check if the current user is the one you're looking for
                     if (userName.equals(line)) {
                         String password = secretNode.get("secret").asText();
-                       // send.println("Enter your password below. Yout nonce is: " + nonce);
+                        // send.println("Enter your password below. Yout nonce is: " + nonce);
                         send.println(password + " your nonce is: " + nonce);
-                        
+                        //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
                         // Get hashed pass and nonce from client, compare and validate to kdc version
                         String line2 = recv.nextLine();
-                        String line3 = recv.nextLine();
                         send.println("Checking hash . . .");
                         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                        byte[] hashPass = digest.digest(password.getBytes(StandardCharsets.UTF_8));
-                        byte[] hashNonce = digest.digest(nonce.getBytes(StandardCharsets.UTF_8));
-                        if (line2.equals(Arrays.toString(hashPass)) && line3.equals(Arrays.toString(hashNonce))) {
+                        byte[] hashPass = password.getBytes(StandardCharsets.UTF_8);
+                        byte[] hashNonce = nonce.getBytes(StandardCharsets.UTF_8);
+                        byte[] combined = new byte[hashPass.length + hashNonce.length];
+                        System.arraycopy(hashPass, 0, combined, 0, hashPass.length);
+                        System.arraycopy(hashNonce, 0, combined, hashPass.length, hashNonce.length);
+                        combined = digest.digest(combined);
+                        if (line2.equals(Arrays.toString(combined))) {
                             send.println("You have been authenticated");
+                            sendSessionKey("", "");
                         } else {
                             send.println("You have denied");
                         }
@@ -153,9 +149,6 @@ public class KDCServer {
                         System.exit(0);
                     }
                 }
-               
-              
-
 
                 // Close the connection.
                 sock.close();
@@ -163,6 +156,15 @@ public class KDCServer {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+    }
+    
+    //yes this code doesn't work, I just started it -william
+    //this is the part where session key is sent to client 
+    private static void sendSessionKey(String uname, String sName){
+        //validity period comes from config file  
+        Ticket toSend = new Ticket(System.currentTimeMillis(), 0, uname, sName);
+        
+        
     }
 
 }
