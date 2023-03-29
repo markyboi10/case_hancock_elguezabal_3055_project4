@@ -1,20 +1,19 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package KDCServer;
 
 /**
  *
  * @author Mark Case
  */
+import KDCServer.config.Config;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,8 +30,10 @@ import merrimackutil.util.Tuple;
 public class KDCServer {
 
     private static String[] userAndPass = {"Alice", "123321"};
+    
+    private static Config config;
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
         ar[0] = new LongOption("config", true, 'c');
@@ -50,12 +51,14 @@ public class KDCServer {
                     + " -h, --help Display the help.");
             System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'c')) {
-            //load config
+            // Initialize config
+            config = new Config(opt.getSecond());
         }
+        
         System.out.println(Arrays.toString(userAndPass));
  
         try {
-            ServerSocket server = new ServerSocket(5000);
+            ServerSocket server = new ServerSocket(config.getPort());
 
             // Loop forever handing connections.
             while (true) {

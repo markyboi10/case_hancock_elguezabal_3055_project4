@@ -1,4 +1,3 @@
-
 package KDCServer;
 
 import java.io.InvalidObjectException;
