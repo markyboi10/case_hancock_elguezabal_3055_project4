@@ -26,13 +26,14 @@ import merrimackutil.util.Tuple;
 import ssoclient.config.Config;
 import ssoclient.config.Host;
 
-
 public class SSOClient {
 
     public static ArrayList<Host> hosts = new ArrayList<>();
     private static Config config;
-    
+
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
+        //temporarily commented out, will be needed in the final version  
+        /*
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
         ar[0] = new LongOption("hosts", true, 'h');
@@ -50,9 +51,9 @@ public class SSOClient {
                     + "   -s, --service The name of the service");
             System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'h')) {
-             config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
+            config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
         }
-
+        */
         Scanner scan = new Scanner(System.in);
         Socket sock;
         Scanner recv = null;
@@ -96,17 +97,25 @@ public class SSOClient {
         }
 
         // Client sends hashed password and nonce
+        //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
         String msg2 = scan.nextLine();
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] clientHashPass = digest.digest(msg2.getBytes(StandardCharsets.UTF_8));
-        byte[] clientHashNonce = digest.digest(ExtractedNonce.getBytes(StandardCharsets.UTF_8));
-        send.println(Arrays.toString(clientHashPass));
-        send.println(Arrays.toString(clientHashNonce));
+        byte[] clientHashPass = msg2.getBytes(StandardCharsets.UTF_8);
+        byte[] clientHashNonce = ExtractedNonce.getBytes(StandardCharsets.UTF_8);
+        byte[] combined = new byte[clientHashPass.length + clientHashNonce.length];
+        
+        System.arraycopy(clientHashPass, 0, combined, 0, clientHashPass.length);
+        System.arraycopy(clientHashNonce, 0, combined, clientHashPass.length, clientHashNonce.length);
+        combined = digest.digest(combined);
+        //put combined in a JSON string
+        send.println(Arrays.toString(combined));
 
         // Server recieved hash pass and nonce and will check validity via comparison
         String recvMsg2 = recv.nextLine();
         System.out.println("Server Said: " + "\n" + recvMsg2);
         String recvMsg3 = recv.nextLine();
         System.out.println(recvMsg3);
+        //send the session key request
+        
     }
 }
