@@ -33,21 +33,12 @@ public class KDCServer {
 
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
     private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
-    private static File hostsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\hosts.json");
 
     public static JsonNode JSONSecrets() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(secretsFile);
         JsonNode secretsNode = rootNode.get("secrets");
         return secretsNode;
-
-    }
-
-    public static JsonNode JSONHosts() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(hostsFile);
-        JsonNode hostsNode = rootNode.get("hosts");
-        return hostsNode;
 
     }
 
@@ -77,24 +68,10 @@ public class KDCServer {
         }
        
 
-        String host = null;
-        int port = 0;
-
-        for (JsonNode hostNode : JSONHosts()) {
-            String hostName = hostNode.get("host-name").asText();
-            // Check if the current user is the one you're looking for
-            if (hostName.equals("kdcd")) {
-                host = hostNode.get("host-name").asText();
-                port = 5000;
-                // send.println("Enter your password below. Yout nonce is: " + nonce);
-                System.out.println(host);
-            }
-        }
-
         try {
-            System.out.println(port);
+            System.out.println(config.getPort());
 //            ServerSocket server = new ServerSocket(config.getPort());
-            ServerSocket server = new ServerSocket(port);
+            ServerSocket server = new ServerSocket(config.getPort());
 
             // Loop forever handing connections.
             while (true) {
