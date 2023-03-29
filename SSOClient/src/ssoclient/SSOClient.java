@@ -30,6 +30,8 @@ public class SSOClient {
 
     public static ArrayList<Host> hosts = new ArrayList<>();
     private static Config config;
+    private static String svcName;
+    private static String usrName;
 
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
         //temporarily commented out, will be needed in the final version  
@@ -116,6 +118,6 @@ public class SSOClient {
         String recvMsg3 = recv.nextLine();
         System.out.println(recvMsg3);
         //send the session key request
-        
+        //we need to send a packet containing the username and the svc name
     }
 }
