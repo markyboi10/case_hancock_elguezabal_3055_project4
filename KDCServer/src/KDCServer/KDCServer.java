@@ -44,7 +44,16 @@ public class KDCServer {
         return secretsNode;
 
     }
-    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+
+
+
+        //System.out.println(JSON().toString());
+    
+   // private static Config config;
+
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
+        
+        
 //        OptionParser op = new OptionParser(args);
 //        LongOption[] ar = new LongOption[2];
 //        ar[0] = new LongOption("config", true, 'c');
@@ -62,37 +71,11 @@ public class KDCServer {
 //                    + " -h, --help Display the help.");
 //            System.exit(0);
 //        } else if (Objects.equals(opt.getFirst(), 'c')) {
-//            //load config
+//            // Initialize config
+//            config = new Config(opt.getSecond());
 //        }
-
-
-        //System.out.println(JSON().toString());
-    
-    private static Config config;
-
-    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
-        OptionParser op = new OptionParser(args);
-        LongOption[] ar = new LongOption[2];
-        ar[0] = new LongOption("config", true, 'c');
-        ar[1] = new LongOption("help", false, 'h');
-        op.setLongOpts(ar);
-        op.setOptString("hc:");
-        Tuple<Character,String> opt = op.getLongOpt(false);
-        if (opt == null || Objects.equals(opt.getFirst(), 'h')) {
-            System.out.println("usage:\n"
-                    + "kdcd\n"
-                    + " kdcd --config <configfile>\n"
-                    + " kdcd --help\n"
-                    + "options:\n"
-                    + " -c, --config Set the config file.\n"
-                    + " -h, --help Display the help.");
-            System.exit(0);
-        } else if (Objects.equals(opt.getFirst(), 'c')) {
-            // Initialize config
-            config = new Config(opt.getSecond());
-        }
         
-        System.out.println(Arrays.toString(userAndPass));
+
  
 //        for (JsonNode secretNode : JSON()) {
 //            String userName = secretNode.get("user").asText();
@@ -105,7 +88,8 @@ public class KDCServer {
 //        }
         
         try {
-            ServerSocket server = new ServerSocket(config.getPort());
+//            ServerSocket server = new ServerSocket(config.getPort());
+ServerSocket server = new ServerSocket(5000);
 
             // Loop forever handing connections.
             while (true) {
