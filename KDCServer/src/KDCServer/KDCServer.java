@@ -36,12 +36,21 @@ public class KDCServer {
     private static String[] userAndPass = {"Alice", "123321"};
 
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
-    private static File secretsFile = new File("C:\\Users\\MarkC\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
-    public static JsonNode JSON() throws IOException {
+    private static File secretsFile = new File("C:\\Users\\MarkC\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4-master\\kdc-config\\secrets.json");
+    private static File hostsFile = new File("C:\\Users\\MarkC\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4-master\\hosts.json");
+    public static JsonNode JSONSecrets() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(secretsFile);
         JsonNode secretsNode = rootNode.get("secrets");
         return secretsNode;
+
+    }
+    
+        public static JsonNode JSONHosts() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(hostsFile);
+        JsonNode hostsNode = rootNode.get("hosts");
+        return hostsNode;
 
     }
 
@@ -51,7 +60,7 @@ public class KDCServer {
     
    // private static Config config;
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
         
         
 //        OptionParser op = new OptionParser(args);
@@ -74,22 +83,26 @@ public class KDCServer {
 //            // Initialize config
 //            config = new Config(opt.getSecond());
 //        }
-        
+       
 
- 
-//        for (JsonNode secretNode : JSON()) {
-//            String userName = secretNode.get("user").asText();
-//            // Check if the current user is the one you're looking for
-//            if (userName.equals("echoservice")) {
-//                String password = secretNode.get("secret").asText();
-//                System.out.println(password);
-//                break;
-//            }
-//        }
+        String host = null;
+        int port = 0;
+
+        for (JsonNode hostNode : JSONHosts()) {
+            String hostName = hostNode.get("host-name").asText();
+            // Check if the current user is the one you're looking for
+            if (hostName.equals("kdcd")) {
+                host = hostNode.get("host-name").asText();
+                port = 5000;
+                // send.println("Enter your password below. Yout nonce is: " + nonce);
+                System.out.println(host);
+            } 
+        }
         
         try {
+            System.out.println(port);
 //            ServerSocket server = new ServerSocket(config.getPort());
-ServerSocket server = new ServerSocket(5000);
+            ServerSocket server = new ServerSocket(port);
 
             // Loop forever handing connections.
             while (true) {
@@ -113,7 +126,7 @@ ServerSocket server = new ServerSocket(5000);
                 // Check if user exists and demand password + send nonce if correct,
                 // error otherwise
                 
-                for (JsonNode secretNode : JSON()) {
+                for (JsonNode secretNode : JSONSecrets()) {
                     String userName = secretNode.get("user").asText();
                     // Check if the current user is the one you're looking for
                     if (userName.equals(line)) {
