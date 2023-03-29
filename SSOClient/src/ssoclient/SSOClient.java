@@ -1,13 +1,20 @@
 package ssoclient;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
+import ssoclient.config.Config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -16,13 +23,16 @@ import java.util.regex.Pattern;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
+import ssoclient.config.Config;
 import ssoclient.config.Host;
+
 
 public class SSOClient {
 
     public static ArrayList<Host> hosts = new ArrayList<>();
+    private static Config config;
     
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
         ar[0] = new LongOption("hosts", true, 'h');
@@ -40,8 +50,9 @@ public class SSOClient {
                     + "   -s, --service The name of the service");
             System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'h')) {
-            //load hosts config
+             config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
         }
+
         Scanner scan = new Scanner(System.in);
         Socket sock;
         Scanner recv = null;
@@ -70,7 +81,9 @@ public class SSOClient {
 
         // KDC checks username validity and if valid, demands password and gives a nonce
         String recvMsg = recv.nextLine();
-        System.out.println("Server Said: " + "\n" + recvMsg);
+        System.out.println("""
+                           Server Said: 
+                           """ + recvMsg);
 
         // Extract nonce
         String ExtractedNonce = "";

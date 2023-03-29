@@ -33,14 +33,15 @@ public class Config implements JSONSerializable {
         }
         
         // Construct JSON Object and load hosts
-        JSONArray array = JsonIO.readArray(file);
+        JSONObject obj = JsonIO.readObject(file);
+        JSONArray array = obj.getArray("hosts");
         // deserialize
         deserialize(array);
     }
 
     @Override
     public String serialize() {
-        return "";// We should never be converting this file to JSON, only read.
+        return toJSONType().getFormattedJSON();// We should never be converting this file to JSON, only read.
     }
 
     @Override
@@ -62,14 +63,20 @@ public class Config implements JSONSerializable {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             
-            
-            
+            // Add all hosts to the SSO Client.
+            ssoclient.SSOClient.hosts.addAll(hosts);
         }       
     }
 
     @Override
     public JSONType toJSONType() {
-        return null; // We are never reading this file to JSON.
+        JSONObject obj = new JSONObject();
+        JSONArray arr = new JSONArray();
+        
+        arr.addAll(ssoclient.SSOClient.hosts); // Add all hosts to the array.
+        
+        obj.put("hosts", arr); // Assign the hosts array.
+        return obj; // We are never reading this file to JSON.
     }
 
 }
