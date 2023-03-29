@@ -43,11 +43,37 @@ public class Host implements JSONSerializable {
     @Override
     public JSONType toJSONType() {
         JSONObject obj = new JSONObject();
-        obj.put("host-name", this.host_name);
-        obj.put("address", this.address);
-        obj.put("port", this.port);
+        obj.put("host-name", this.getHost_name());
+        obj.put("address", this.getAddress());
+        obj.put("port", this.getPort());
 
         return obj; // We should never be writing to a file.
+    }
+
+    
+    /**
+     * Accessors
+     */
+    
+    /**
+     * @return the host_name
+     */
+    public String getHost_name() {
+        return host_name;
+    }
+
+    /**
+     * @return the address
+     */
+    public String getAddress() {
+        return address;
+    }
+
+    /**
+     * @return the port
+     */
+    public int getPort() {
+        return port;
     }
     
     

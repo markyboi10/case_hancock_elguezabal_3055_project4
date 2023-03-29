@@ -6,12 +6,8 @@ package KDCServer;
  */
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.BufferedReader;
 import java.io.File;
-import KDCServer.config.Config;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.util.Scanner;
@@ -22,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
@@ -64,26 +59,26 @@ public class KDCServer {
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
         
         
-//        OptionParser op = new OptionParser(args);
-//        LongOption[] ar = new LongOption[2];
-//        ar[0] = new LongOption("config", true, 'c');
-//        ar[1] = new LongOption("help", false, 'h');
-//        op.setLongOpts(ar);
-//        op.setOptString("hc:");
-//        Tuple<Character,String> opt = op.getLongOpt(false);
-//        if (opt == null || Objects.equals(opt.getFirst(), 'h')) {
-//            System.out.println("usage:\n"
-//                    + "kdcd\n"
-//                    + " kdcd --config <configfile>\n"
-//                    + " kdcd --help\n"
-//                    + "options:\n"
-//                    + " -c, --config Set the config file.\n"
-//                    + " -h, --help Display the help.");
-//            System.exit(0);
-//        } else if (Objects.equals(opt.getFirst(), 'c')) {
-//            // Initialize config
-//            config = new Config(opt.getSecond());
-//        }
+        OptionParser op = new OptionParser(args);
+        LongOption[] ar = new LongOption[2];
+        ar[0] = new LongOption("config", true, 'c');
+        ar[1] = new LongOption("help", false, 'h');
+        op.setLongOpts(ar);
+        op.setOptString("hc:");
+        Tuple<Character,String> opt = op.getLongOpt(false);
+        if (opt == null || Objects.equals(opt.getFirst(), 'h')) {
+            System.out.println("usage:\n"
+                    + "kdcd\n"
+                    + " kdcd --config <configfile>\n"
+                    + " kdcd --help\n"
+                    + "options:\n"
+                    + " -c, --config Set the config file.\n"
+                    + " -h, --help Display the help.");
+           System.exit(0);
+        } else if (Objects.equals(opt.getFirst(), 'c')) {
+           // Initialize config
+           config = new Config(opt.getSecond());
+        }
        
 
         String host = null;
