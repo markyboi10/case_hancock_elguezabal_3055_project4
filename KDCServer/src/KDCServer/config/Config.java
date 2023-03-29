@@ -38,7 +38,7 @@ public class Config implements JSONSerializable {
 
     @Override
     public String serialize() {
-        return "";// We should never be converting this file to JSON, only read.
+        return toJSONType().getFormattedJSON();// We should never be serializing the JSON.
     }
 
     @Override
@@ -67,9 +67,14 @@ public class Config implements JSONSerializable {
                     
     }
 
-    @Override
+   @Override
     public JSONType toJSONType() {
-        return null; // We are never reading this file to JSON.
+        JSONObject obj = new JSONObject();
+        obj.put("port", this.port);
+        obj.put("debug", this.debug);
+        obj.put("validity-period", this.validity_period);
+        obj.put("secrets-file", this.secrets_file);
+        return obj; // We are never reading this file to JSON.
     }
 
      /**

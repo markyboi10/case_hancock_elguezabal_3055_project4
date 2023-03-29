@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -15,9 +16,12 @@ import java.util.regex.Pattern;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
+import ssoclient.config.Host;
 
 public class SSOClient {
 
+    public static ArrayList<Host> hosts = new ArrayList<>();
+    
     public static void main(String[] args) throws NoSuchAlgorithmException {
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
