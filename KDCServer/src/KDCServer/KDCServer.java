@@ -8,7 +8,10 @@ package KDCServer;
  *
  * @author Mark Case
  */
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.net.Socket;
 import java.net.ServerSocket;
@@ -31,29 +34,49 @@ import merrimackutil.util.Tuple;
 public class KDCServer {
 
     private static String[] userAndPass = {"Alice", "123321"};
+    //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
+    private static File secretsFile = new File("C:\\Users\\MarkC\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
+    public static JsonNode JSON() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(secretsFile);
+        JsonNode secretsNode = rootNode.get("secrets");
+        return secretsNode;
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        OptionParser op = new OptionParser(args);
-        LongOption[] ar = new LongOption[2];
-        ar[0] = new LongOption("config", true, 'c');
-        ar[1] = new LongOption("help", false, 'h');
-        op.setLongOpts(ar);
-        op.setOptString("hc:");
-        Tuple<Character,String> opt = op.getLongOpt(false);
-        if (opt == null || Objects.equals(opt.getFirst(), 'h')) {
-            System.out.println("usage:\n"
-                    + "kdcd\n"
-                    + " kdcd --config <configfile>\n"
-                    + " kdcd --help\n"
-                    + "options:\n"
-                    + " -c, --config Set the config file.\n"
-                    + " -h, --help Display the help.");
-            System.exit(0);
-        } else if (Objects.equals(opt.getFirst(), 'c')) {
-            //load config
-        }
-        System.out.println(Arrays.toString(userAndPass));
+    }
+    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+//        OptionParser op = new OptionParser(args);
+//        LongOption[] ar = new LongOption[2];
+//        ar[0] = new LongOption("config", true, 'c');
+//        ar[1] = new LongOption("help", false, 'h');
+//        op.setLongOpts(ar);
+//        op.setOptString("hc:");
+//        Tuple<Character,String> opt = op.getLongOpt(false);
+//        if (opt == null || Objects.equals(opt.getFirst(), 'h')) {
+//            System.out.println("usage:\n"
+//                    + "kdcd\n"
+//                    + " kdcd --config <configfile>\n"
+//                    + " kdcd --help\n"
+//                    + "options:\n"
+//                    + " -c, --config Set the config file.\n"
+//                    + " -h, --help Display the help.");
+//            System.exit(0);
+//        } else if (Objects.equals(opt.getFirst(), 'c')) {
+//            //load config
+//        }
+
+
+        //System.out.println(JSON().toString());
  
+//        for (JsonNode secretNode : JSON()) {
+//            String userName = secretNode.get("user").asText();
+//            // Check if the current user is the one you're looking for
+//            if (userName.equals("echoservice")) {
+//                String password = secretNode.get("secret").asText();
+//                System.out.println(password);
+//                break;
+//            }
+//        }
+        
         try {
             ServerSocket server = new ServerSocket(5000);
 
@@ -78,25 +101,36 @@ public class KDCServer {
 
                 // Check if user exists and demand password + send nonce if correct,
                 // error otherwise
-                if(line.equals(userAndPass[0])) {
-                    send.println("Enter your password below. Your nonce is: " + nonce);
-                } else {
-                    send.println("User Error, name not found");
-                    System.exit(0);
+                
+                for (JsonNode secretNode : JSON()) {
+                    String userName = secretNode.get("user").asText();
+                    // Check if the current user is the one you're looking for
+                    if (userName.equals(line)) {
+                        String password = secretNode.get("secret").asText();
+                       // send.println("Enter your password below. Yout nonce is: " + nonce);
+                        send.println(password + " your nonce is: " + nonce);
+                        
+                        // Get hashed pass and nonce from client, compare and validate to kdc version
+                        String line2 = recv.nextLine();
+                        String line3 = recv.nextLine();
+                        send.println("Checking hash . . .");
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                        byte[] hashPass = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+                        byte[] hashNonce = digest.digest(nonce.getBytes(StandardCharsets.UTF_8));
+                        if (line2.equals(Arrays.toString(hashPass)) && line3.equals(Arrays.toString(hashNonce))) {
+                            send.println("You have been authenticated");
+                        } else {
+                            send.println("You have denied");
+                        }
+                        break;
+                    } else {
+                        send.println("User Error, name not found");
+                        System.exit(0);
+                    }
                 }
+               
               
-                // Get hashed pass and nonce from client, compare and validate to kdc version
-                String line2 = recv.nextLine();
-                String line3 = recv.nextLine();
-                send.println("Checking hash . . .");
-                MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                byte[] hashPass = digest.digest(userAndPass[1].getBytes(StandardCharsets.UTF_8));
-                byte[] hashNonce = digest.digest(nonce.getBytes(StandardCharsets.UTF_8));
-                if(line2.equals(Arrays.toString(hashPass)) && line3.equals(Arrays.toString(hashNonce))) {
-                    send.println("You have been authenticated");
-                } else {
-                    send.println("You have denied");
-                }
+
 
                 // Close the connection.
                 sock.close();
