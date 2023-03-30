@@ -1,4 +1,4 @@
-package KDCServer;
+package packets;
 
 /**
  *
