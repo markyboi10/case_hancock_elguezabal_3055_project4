@@ -151,7 +151,7 @@ public class KDCServer {
         }
         
     }
-    
+        
     /**
      * Waits for a connection with a peer socket, then polls for a message being sent.
      * Each iteration of the loop operates for one message, as not to block multi-peer communication.
@@ -185,10 +185,8 @@ public class KDCServer {
                     }
                 }; break;
                 
-                
-                
             }
-            
+          
             // Close the connection
             server.close();
         }

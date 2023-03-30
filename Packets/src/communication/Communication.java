@@ -45,7 +45,7 @@ public class Communication {
      * @param port Port to connect too on the server
      * @param messgae Packet to be sent
      */
-    public static void connectAndSend(String address, int port, Packet messgae) throws IOException {
+    public static Socket connectAndSend(String address, int port, Packet messgae) throws IOException {
         Socket peerSocket = null;
         try {
             // Set up a connection to the echo server running on the same machine.
@@ -58,6 +58,7 @@ public class Communication {
         }
         
         send(peerSocket, messgae);
+        return peerSocket;
     }
     
     /**

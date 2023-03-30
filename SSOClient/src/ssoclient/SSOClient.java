@@ -38,14 +38,16 @@ public class SSOClient {
     private static String service;
     
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException {
-        //temporarily commented out, will be needed in the final version  
-        
+
+        // Initializing the CLI
         OptionParser op = new OptionParser(args);
-        LongOption[] ar = new LongOption[2];
+        LongOption[] ar = new LongOption[3];
         ar[0] = new LongOption("hosts", true, 'h');
         ar[1] = new LongOption("user", true, 'u');
-        ar[1] = new LongOption("service", true, 's');
+        ar[2] = new LongOption("service", true, 's');
         op.setLongOpts(ar);
+        op.setOptString("h:u:s:");
+        
         Tuple<Character, String> opt = op.getLongOpt(false);
         if (opt == null) {
             System.out.println("usage:\n"
@@ -65,6 +67,7 @@ public class SSOClient {
         } 
         
         Tuple<Character, String> opt2 = op.getLongOpt(false);
+        System.out.println(opt2.getSecond());
         if(Objects.equals(opt2.getFirst(), 'u')) {
             // Init the username and service
             user = opt2.getSecond();
@@ -74,7 +77,8 @@ public class SSOClient {
         }
         
         Tuple<Character, String> opt3 = op.getLongOpt(false);
-        if(opt3 != null && Objects.equals(opt3.getFirst(), 's')) {
+        System.out.println(opt3.getSecond());
+        if(opt3.getSecond() != null && Objects.equals(opt3.getFirst(), 's')) {
             // Init the username and service
             service = opt3.getSecond();
         } 
@@ -83,6 +87,9 @@ public class SSOClient {
         if(service.equalsIgnoreCase("echoservice")) { // KDC
             // Runs the CHAP protocol
             CHAP();
+        } else {
+            System.out.println("Service not found with name ["+service+"]. Closing program ");
+            System.exit(0);
         } // If we do the bonus then we add another condition here.
         
        
@@ -107,11 +114,10 @@ public class SSOClient {
         
         // MESSAGE 1
         CHAPClaim claim = new CHAPClaim(user); // Construct the packet
-        Communication.connectAndSend(host.getAddress(), host.getPort(), claim); // Send the packet
-       
-        
+        Socket peer1 = Communication.connectAndSend(host.getAddress(), host.getPort(), claim); // Send the packet
+               
         // MESSAGE 2
-        CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peerSocket); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
+        CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peer1); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
         
         // MESSAGE 3
         // Client sends hashed password and nonce
@@ -128,14 +134,17 @@ public class SSOClient {
         System.arraycopy(clientHashNonce, 0, combined, clientHashPass.length, clientHashNonce.length);
         combined = digest.digest(combined);
         CHAPResponse response = new CHAPResponse(Base64.getEncoder().encodeToString(combined));
-        Communication.connectAndSend(host.getAddress(), host.getPort(), response);
+        Socket peer2 = Communication.connectAndSend(host.getAddress(), host.getPort(), response);
         
         //MESSAGE 4
         //Receive the status message
-        CHAPStatus chapStatus_Packet = (CHAPStatus) Communication.read(peerSocket);
+        CHAPStatus chapStatus_Packet = (CHAPStatus) Communication.read(peer2);
         if (chapStatus_Packet.getMsg() == false) {
             return false;
         }
+        
+        System.out.println("GOT TO THE END! :)");
+        
         return true; // completed CHAP
     }    
     

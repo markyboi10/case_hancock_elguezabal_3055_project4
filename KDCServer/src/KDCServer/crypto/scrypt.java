@@ -54,6 +54,5 @@ public class scrypt {
         SecretKey key = factory.generateSecret(
                 scryptSpec);
         return key;
-        
     }
 }
