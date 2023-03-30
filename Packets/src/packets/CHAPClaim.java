@@ -30,6 +30,9 @@ public class CHAPClaim implements Packet, JSONSerializable {
         this.uName = uName;
     }
 
+    public String getuName() {
+        return uName;
+    }
 
     /**
      * Converts a JSONObject into a ticket object
@@ -82,7 +85,7 @@ public class CHAPClaim implements Packet, JSONSerializable {
     @Override
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
-        
+        object.put("packetType", this.packetType.toString());
         object.put("uName", this.uName);
 
         return object;
