@@ -148,6 +148,8 @@ public class KDCServer {
         Ticket toSend = new Ticket(System.currentTimeMillis(), 0, uname, sName);
         try {
             Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, toSend.getValidityTime(), toSend.getCreateTime(), uname, sName);
+            toSend.seteSKey(keyiv.getFirst());
+            toSend.setIv(keyiv.getSecond());
             //now we send!
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
             Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
