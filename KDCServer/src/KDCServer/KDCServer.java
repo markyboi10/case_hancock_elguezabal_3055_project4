@@ -46,6 +46,7 @@ public class KDCServer {
     private static SecretsConfig secretsConfig;
 
     private static ServerSocket server;
+    private static String nonce;
     
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
     private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
@@ -86,7 +87,12 @@ public class KDCServer {
 
             // Accept packets & communicate
             poll();
-            
+
+            NonceCache nc = new NonceCache(32, 30);
+            byte[] nonceBytes = nc.getNonce();
+            nonce = Base64.getEncoder().encodeToString(nonceBytes);
+
+
             // Loop forever handing connections.
             /**
             while (true) {
@@ -172,7 +178,7 @@ public class KDCServer {
                     // Check if the user exists in the secretes && send a challenge back.
                     CHAPClaim chapClaim_packet = (CHAPClaim) packet;
                     if(secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
-                        CHAPChallenge chapChallenge_packet = new CHAPChallenge("NONCE GOES HERE");
+                        CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
                     }
                 }; break;
