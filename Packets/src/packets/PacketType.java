@@ -9,7 +9,11 @@ import java.util.Arrays;
  */
 public enum PacketType {
     
+      SessionKeyRequest(packets.CHAPChallenge.class),
       SessionKeyResponse(packets.SessionKeyResponse.class),
+      CHAPChallenge(packets.CHAPChallenge.class),
+      CHAPResponse(packets.CHAPResponse.class),
+      CHAPStatus(packets.CHAPStatus.class),
       CHAPClaim(packets.CHAPClaim.class) 
       ;
 

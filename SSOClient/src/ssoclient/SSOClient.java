@@ -1,5 +1,6 @@
 package ssoclient;
 
+import communication.Communication;
 import java.io.FileNotFoundException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -18,6 +19,7 @@ import java.util.regex.Pattern;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
+import packets.CHAPChallenge;
 import packets.CHAPClaim;
 import ssoclient.config.Config;
 import ssoclient.config.Host;
@@ -29,12 +31,9 @@ public class SSOClient {
     private static String svcName;
     private static String usrName;
     
-    private static Scanner scan = new Scanner(System.in);
-    private static Socket sock;
-    private static Scanner recv;
-    private static PrintWriter send;
+    private static Socket peerSocket;
     
-    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
         //temporarily commented out, will be needed in the final version  
         
         OptionParser op = new OptionParser(args);
@@ -122,11 +121,7 @@ public class SSOClient {
             }
             
             // Set up a connection to the echo server running on the same machine.
-            sock = new Socket(host.getAddress(), host.getPort());
-
-            // Set up the streams for the socket.
-            recv = new Scanner(sock.getInputStream());
-            send = new PrintWriter(sock.getOutputStream(), true);
+            peerSocket = new Socket(host.getAddress(), host.getPort());
         } catch (UnknownHostException ex) {
             System.out.println("Host ["+host_name+"] connected could not be established.");
         } catch (IOException ioe) {
@@ -140,15 +135,16 @@ public class SSOClient {
      * All protocols should be ran on one single thread.
      * @return boolean value on if the chap protocol finished correctly
      */
-    private static boolean CHAP() {
+    private static boolean CHAP() throws IOException, NoSuchMethodException {
        
         // MESSAGE 1
-        packets.CHAPClaim claim = new CHAPClaim(usrName);
-        send.println(claim.send()); // send username
+        CHAPClaim claim = new CHAPClaim(usrName); // Construct the packet
+        Communication.send(peerSocket, claim); // Send the packet
        
-        // KDC checks username validity and if valid, demands password and gives a nonce
-        String recvMsg = recv.nextLine();
-               
+        
+        // MESSAGE 2
+        CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peerSocket); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
+        
         
         return true; // completed CHAP
     }    

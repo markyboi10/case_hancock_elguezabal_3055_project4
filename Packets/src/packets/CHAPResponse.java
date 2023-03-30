@@ -121,6 +121,14 @@ public class CHAPResponse implements Packet, JSONSerializable {
         } catch (InvalidObjectException ex) {
             Logger.getLogger(SessionKeyResponse.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+    }
+    
+    /**
+     * The PacketType value of this packet.
+     * @return 
+     */
+    @Override
+    public PacketType getType() {
+        return packetType;
     }
 }

@@ -1,7 +1,7 @@
 package packets;
 
 /**
- *
+ * Interface for all packet classes.
  * @author Alex
  */
 public interface Packet {
@@ -20,4 +20,9 @@ public interface Packet {
      */
     public void recieve(String packet);
     
+    /**
+     * The PacketType value of this packet.
+     * @return 
+     */
+    public PacketType getType();
 }

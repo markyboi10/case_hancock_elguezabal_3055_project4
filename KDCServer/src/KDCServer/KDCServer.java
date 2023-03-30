@@ -8,6 +8,7 @@ import KDCServer.config.Config;
 import KDCServer.config.Secrets;
 import KDCServer.config.SecretsConfig;
 import KDCServer.crypto.GCMEncrypt;
+import communication.Communication;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.Socket;
@@ -32,6 +33,7 @@ import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.NonceCache;
 import merrimackutil.util.Tuple;
+import packets.Packet;
 import packets.SessionKeyResponse;
 
 public class KDCServer {
@@ -140,17 +142,29 @@ public class KDCServer {
             server.close();
             System.out.println("KDC Server IOException error, closing down.");
             System.exit(0);
+        } catch (NoSuchMethodException ex) {
+            ex.printStackTrace();
+            server.close();
+            System.out.println("KDC Server IOException error, closing down.");
+            System.exit(0);
         }
         
     }
     
-    private static void poll() throws IOException {
+    /**
+     * Waits for a connection with a peer socket, then polls for a message being sent.
+     * Each iteration of the loop operates for one message, as not to block multi-peer communication.
+     * 
+     * @throws IOException 
+     */
+    private static void poll() throws IOException, NoSuchMethodException {
         while(true) { // Consistently accept connections
             
             // Establish the connection & read the message
             Socket peer = server.accept();
             // Determine the packet type.
            
+            Packet packet = Communication.read(peer);
             
             
             // Close the connection

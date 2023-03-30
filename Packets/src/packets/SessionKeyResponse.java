@@ -202,4 +202,12 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
         
     }
     
+    /**
+     * The PacketType value of this packet.
+     * @return 
+     */
+    @Override
+    public PacketType getType() {
+        return packetType;
+    }
 }
