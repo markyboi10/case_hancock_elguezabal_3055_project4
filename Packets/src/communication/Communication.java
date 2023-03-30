@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package communication;
 
 import java.io.IOException;
@@ -10,6 +6,7 @@ import java.net.Socket;
 import java.util.Scanner;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONObject;
+import packets.CHAPClaim;
 import packets.Packet;
 import packets.PacketType;
 
@@ -29,7 +26,7 @@ public class Communication {
         new PrintWriter(peer.getOutputStream()).print(message.send());
     }
     
-    public static Packet read(Socket peer) throws IOException {
+    public static Packet read(Socket peer) throws IOException, NoSuchMethodException {
         Scanner scanner = new Scanner(peer.getInputStream());
         
         // Input from peer
@@ -44,9 +41,18 @@ public class Communication {
         if(packetType == null) {
             throw new NullPointerException("No packet called ["+identifier+"] found.");
         }
-        
-        
-        
+       
+        // Switch over all of the packet types
+        // Using a switch statement to prevent reflection
+        switch(packetType) {
+            case SessionKeyRequest: return new CHAPClaim(line, packetType);
+            case SessionKeyResponse: return new CHAPClaim(line, packetType);
+            case CHAPChallenge: return new CHAPClaim(line, packetType);
+            case CHAPResponse: return new CHAPClaim(line, packetType);
+            case CHAPStatus: return new CHAPClaim(line, packetType);
+            case CHAPClaim: return new CHAPClaim(line, packetType);
+            default: return null;
+        }    
     }
     
 }
