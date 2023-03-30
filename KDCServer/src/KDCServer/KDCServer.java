@@ -2,10 +2,10 @@ package KDCServer;
 
 /**
  *
- * @author Mark Case
+ * @author Mark Case, William Hancock
  */
-import packets.SessionKeyResponse;
 import KDCServer.config.Config;
+import KDCServer.crypto.GCMEncrypt;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.Socket;
@@ -14,16 +14,22 @@ import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.NonceCache;
 import merrimackutil.util.Tuple;
+import packets.SessionKeyResponse;
 
 public class KDCServer {
 
@@ -105,7 +111,7 @@ public class KDCServer {
                         combined = digest.digest(combined);
                         if (line2.equals(Arrays.toString(combined))) {
                             send.println("You have been authenticated");
-                            sendSessionKey("", "");
+                            sendSessionKey("", "", password);
                         } else {
                             send.println("You have denied");
                         }
@@ -124,12 +130,18 @@ public class KDCServer {
         }
     }
     
-    //yes this code doesn't work, I just started it -william
     //this is the part where session key is sent to client 
-    private static void sendSessionKey(String uname, String sName){
+    private static void sendSessionKey(String uname, String sName, String pw){
         //validity period comes from config file  
         SessionKeyResponse toSend = new SessionKeyResponse(System.currentTimeMillis(), 0, uname, sName);
-        
+        try {
+            Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, toSend.getValidityTime(), toSend.getCreateTime(), uname, sName);
+            toSend.seteSKey(keyiv.getFirst());
+            toSend.setIv(keyiv.getSecond());
+            //now we send!
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
+            Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
 

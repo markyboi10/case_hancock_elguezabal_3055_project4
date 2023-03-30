@@ -57,6 +57,14 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     public void seteSKey(byte[] eSKey) {
         this.eSKey = eSKey;
     }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public long getValidityTime() {
+        return validityTime;
+    }
     
     /**
      * Converts a JSONObject into a ticket object
