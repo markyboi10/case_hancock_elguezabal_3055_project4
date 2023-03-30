@@ -1,6 +1,7 @@
 
 package KDCServer.crypto;
 
+import KDCServer.KDCServer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -48,11 +49,11 @@ public class scrypt {
         //
         scryptSpec = new ScryptKeySpec(password.toCharArray(), salt, COST, BLK_SIZE,
                 PARALLELIZATION, KEY_SIZE);
-
+        
         // Generate the secrete key.
         SecretKey key = factory.generateSecret(
                 scryptSpec);
         return key;
-
+        
     }
 }

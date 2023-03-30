@@ -3,6 +3,7 @@ package communication;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 import merrimackutil.json.JsonIO;
 import merrimackutil.json.types.JSONObject;
@@ -34,6 +35,29 @@ public class Communication {
      */
     public static void send(Socket peer, Packet message) throws IOException {
         new PrintWriter(peer.getOutputStream(), true).print(message.send());
+    }
+    
+    /**
+     * Connects to a socket and sends a packet
+     * Used for client-side messaging where we are sending single message instances.
+     * 
+     * @param address Address of the server
+     * @param port Port to connect too on the server
+     * @param messgae Packet to be sent
+     */
+    public static void connectAndSend(String address, int port, Packet messgae) throws IOException {
+        Socket peerSocket = null;
+        try {
+            // Set up a connection to the echo server running on the same machine.
+            peerSocket = new Socket(address, port);
+        } catch (UnknownHostException ex) {
+            System.out.println("Host ["+address+" "+port+"] connected could not be established.");
+        } catch (IOException ioe) {
+            System.out.println("Host ["+address+" "+port+"] connected could not be established.");
+            ioe.printStackTrace();
+        }
+        
+        send(peerSocket, messgae);
     }
     
     /**

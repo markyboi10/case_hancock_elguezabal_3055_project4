@@ -60,72 +60,18 @@ public class SSOClient {
             config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
         }
         
-        
-        
-        // Connect to the KDC_Server
-        connectWithServer("kdcd");
         // Runs the CHAP protocol
         CHAP();
-        
        
         
-
-        /**
-        // Extract nonce
-        String ExtractedNonce = "";
-        Pattern pattern = Pattern.compile("nonce is: (\\S+)");
-        Matcher matcher = pattern.matcher(recvMsg);
-        if (matcher.find()) {
-            ExtractedNonce = matcher.group(1);
-        } else {
-            System.exit(0);
-        }
-        * 
-        
-
-        
-        
-        System.arraycopy(clientHashPass, 0, combined, 0, clientHashPass.length);
-        System.arraycopy(clientHashNonce, 0, combined, clientHashPass.length, clientHashNonce.length);
-        combined = digest.digest(combined);
-        //put combined in a JSON string
-        send.println(Arrays.toString(combined));
-
-        // Server recieved hash pass and nonce and will check validity via comparison
-        String recvMsg2 = recv.nextLine();
-        System.out.println("Server Said: " + "\n" + recvMsg2);
-        String recvMsg3 = recv.nextLine();
-        System.out.println(recvMsg3);
-        //send the session key request
-        //we need to send a packet containing the username and the svc name
-        *
-        **/
     }
     
     /**
-     * Connects to a server based off of {@code host_name} 
-     * Looks up the server in hosts array.
+     * Finds a host based off {@code host_name}
      * @param host_name 
      */
-    private static void connectWithServer(String host_name) {
-        // Construct socket variables.
-        try {
-            // Get the responsable host.
-            Host host = hosts.stream().filter(n -> n.getHost_name().equalsIgnoreCase(host_name)).findFirst().orElse(null);
-            
-            if(host == null) {
-                System.out.println("Host with name ["+host_name+"] is unknown.");
-                return;
-            }
-            
-            // Set up a connection to the echo server running on the same machine.
-            peerSocket = new Socket(host.getAddress(), host.getPort());
-        } catch (UnknownHostException ex) {
-            System.out.println("Host ["+host_name+"] connected could not be established.");
-        } catch (IOException ioe) {
-            System.out.println("Host ["+host_name+"] connected could not be established.");
-            ioe.printStackTrace();
-        }
+    private static Host getHost(String host_name) {
+        return hosts.stream().filter(n -> n.getHost_name().equalsIgnoreCase(host_name)).findFirst().orElse(null);
     }
     
     /**
@@ -135,9 +81,11 @@ public class SSOClient {
      */
     private static boolean CHAP() throws IOException, NoSuchMethodException, NoSuchAlgorithmException {
        
+        Host host = getHost("kdcd");
+        
         // MESSAGE 1
         CHAPClaim claim = new CHAPClaim(usrName); // Construct the packet
-        Communication.send(peerSocket, claim); // Send the packet
+        Communication.connectAndSend(host.getAddress(), host.getPort(), claim); // Send the packet
        
         
         // MESSAGE 2
@@ -158,7 +106,7 @@ public class SSOClient {
         System.arraycopy(clientHashNonce, 0, combined, clientHashPass.length, clientHashNonce.length);
         combined = digest.digest(combined);
         CHAPResponse response = new CHAPResponse(Base64.getEncoder().encodeToString(combined));
-        Communication.send(peerSocket, response);
+        Communication.connectAndSend(host.getAddress(), host.getPort(), response);
         
         //MESSAGE 4
         //Receive the status message

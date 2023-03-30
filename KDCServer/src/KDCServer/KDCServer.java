@@ -39,8 +39,6 @@ import packets.Packet;
 import packets.SessionKeyResponse;
 
 public class KDCServer {
-
-//    private static String[] userAndPass = {"Alice", "123321"};
     
     public static ArrayList<Secrets> secrets = new ArrayList<>();
     private static SecretsConfig secretsConfig;
