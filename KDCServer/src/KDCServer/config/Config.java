@@ -10,7 +10,7 @@ import merrimackutil.json.types.JSONType;
 
 /**
  *
- * @author Alex
+ * @author Mark
  */
 public class Config implements JSONSerializable {
     
