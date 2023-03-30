@@ -1,5 +1,6 @@
-package KDCServer;
+package packets;
 
+import packets.Packet;
 import java.io.InvalidObjectException;
 import java.util.Base64;
 import java.util.logging.Level;
@@ -13,7 +14,7 @@ import merrimackutil.json.types.JSONType;
  *
  * @author William Hancock
  */
-public class Ticket implements Packet, JSONSerializable {
+public class SessionKeyResponse implements Packet, JSONSerializable {
     private long createTime;
     private long validityTime;
     private String uName;
@@ -30,7 +31,7 @@ public class Ticket implements Packet, JSONSerializable {
      * @param iv
      * @param eSKey 
      */
-    public Ticket(long createTime, long validityTime, String uName, String sName, byte[] iv, byte[] eSKey) {
+    public SessionKeyResponse(long createTime, long validityTime, String uName, String sName, byte[] iv, byte[] eSKey) {
         this.createTime = System.currentTimeMillis();
         this.validityTime = validityTime;
         this.uName = uName;
@@ -39,7 +40,7 @@ public class Ticket implements Packet, JSONSerializable {
         this.eSKey = eSKey;
     }
     
-    public Ticket(long createTime, long validityTime, String uName, String sName) {
+    public SessionKeyResponse(long createTime, long validityTime, String uName, String sName) {
         this.createTime = System.currentTimeMillis();
         this.validityTime = validityTime;
         this.uName = uName;
@@ -67,7 +68,7 @@ public class Ticket implements Packet, JSONSerializable {
      * @param packet byte[] of information representing this packet
      * @throws InvalidObjectException Thrown if {@code object} is not a Ticket JSONObject
      */
-    public Ticket(byte[] packet) throws InvalidObjectException {
+    public SessionKeyResponse(byte[] packet) throws InvalidObjectException {
         recieve(packet);
     }
 
@@ -184,7 +185,7 @@ public class Ticket implements Packet, JSONSerializable {
              JSONObject jsonObject = JsonIO.readObject(jsonString); // String to JSONObject
              deserialize(jsonObject); // Deserialize jsonObject
         } catch (InvalidObjectException ex) {
-            Logger.getLogger(Ticket.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionKeyResponse.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }

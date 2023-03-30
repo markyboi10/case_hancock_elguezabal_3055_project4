@@ -1,8 +1,5 @@
 package ssoclient;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -13,8 +10,6 @@ import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Objects;
-import ssoclient.config.Config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -35,7 +30,7 @@ public class SSOClient {
 
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
         //temporarily commented out, will be needed in the final version  
-        /*
+        
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
         ar[0] = new LongOption("hosts", true, 'h');
@@ -55,7 +50,7 @@ public class SSOClient {
         } else if (Objects.equals(opt.getFirst(), 'h')) {
             config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
         }
-        */
+        
         Scanner scan = new Scanner(System.in);
         Socket sock;
         Scanner recv = null;

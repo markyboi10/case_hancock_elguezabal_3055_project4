@@ -7,3 +7,6 @@
 /EchoService/dist/
 /EchoService/build/
 /SSOClient/dist/
+/Packets/nbproject/private/
+/Packets/dist/
+/Packets/build/

@@ -62,7 +62,7 @@ public class Config implements JSONSerializable {
         } else { throw new InvalidObjectException("Expected an KDCConfig object -- debug expected."); }
         
         if(obj.containsKey("validity-period")) {
-            this.validity_period = obj.getInt("validity-period");
+            this.validity_period = Integer.parseInt(obj.getString("validity-period"));
         } else { throw new InvalidObjectException("Expected an KDCConfig object -- validity-period expected."); }
                     
     }

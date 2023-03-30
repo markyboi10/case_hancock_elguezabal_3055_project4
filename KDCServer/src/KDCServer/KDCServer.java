@@ -2,8 +2,9 @@ package KDCServer;
 
 /**
  *
- * @author Mark Case
+ * @author Mark Case, William Hancock
  */
+import packets.SessionKeyResponse;
 import KDCServer.config.Config;
 import KDCServer.crypto.GCMEncrypt;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -42,14 +43,6 @@ public class KDCServer {
 
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
     private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
-
-    public static JsonNode JSONSecrets() throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(secretsFile);
-        JsonNode secretsNode = rootNode.get("secrets");
-        return secretsNode;
-
-    }
 
     //System.out.println(JSON().toString());
     private static Config config;
@@ -103,6 +96,7 @@ public class KDCServer {
 
                 // Check if user exists and demand password + send nonce if correct,
                 // error otherwise
+                /**
                 for (JsonNode secretNode : JSONSecrets()) {
                     String userName = secretNode.get("user").asText();
                     // Check if the current user is the one you're looking for
@@ -132,7 +126,7 @@ public class KDCServer {
                         send.println("User Error, name not found");
                         System.exit(0);
                     }
-                }
+                }**/
 
                 // Close the connection.
                 sock.close();
