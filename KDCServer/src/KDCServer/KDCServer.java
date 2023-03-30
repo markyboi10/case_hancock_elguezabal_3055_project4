@@ -42,15 +42,12 @@ public class KDCServer {
     
     public static ArrayList<Secrets> secrets = new ArrayList<>();
     private static SecretsConfig secretsConfig;
+    private static Config config;
 
     private static ServerSocket server;
-    //private static String nonce;
     
-    //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
-    private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
+    //private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
 
-    //System.out.println(JSON().toString());
-    private static Config config;
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {     
         
         OptionParser op = new OptionParser(args);
@@ -164,13 +161,10 @@ public class KDCServer {
     private static void poll() throws IOException, NoSuchMethodException {
         while(true) { // Consistently accept connections
             
-            NonceCache nc = new NonceCache(32, 30);
-            byte[] nonceBytes = nc.getNonce();
-            String nonce = Base64.getEncoder().encodeToString(nonceBytes);
             // Establish the connection & read the message
             Socket peer = server.accept();
+            
             // Determine the packet type.
-           
             final Packet packet = Communication.read(peer);
             // Switch statement only goes over packets expected by the KDC, any other packet will be ignored.
             switch(packet.getType()) {
@@ -179,6 +173,13 @@ public class KDCServer {
                     // Check if the user exists in the secretes && send a challenge back.
                     CHAPClaim chapClaim_packet = (CHAPClaim) packet;
                     if(secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
+                        
+                        // Construct the nonce
+                        NonceCache nc = new NonceCache(32, 30);
+                        byte[] nonceBytes = nc.getNonce();
+                        String nonce = Base64.getEncoder().encodeToString(nonceBytes);                        
+                        
+                        // Create the packet and send
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
                     }

@@ -32,10 +32,10 @@ public class SSOClient {
    
     public static ArrayList<Host> hosts = new ArrayList<>();
     private static Config config;
-    private static String svcName;
-    private static String usrName;
-    
-    private static Socket peerSocket;
+   
+    // Command line variables
+    private static String user;
+    private static String service;
     
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException {
         //temporarily commented out, will be needed in the final version  
@@ -58,12 +58,34 @@ public class SSOClient {
             System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'h')) {
             config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
+        } else if(Objects.equals(opt.getFirst(), 'u')) {
+            user = opt.getSecond();
+            // If the host is not specified then it is the local hosts.json file
+            config = new Config("hosts.json");
+        } 
+        
+        Tuple<Character, String> opt2 = op.getLongOpt(false);
+        if(Objects.equals(opt2.getFirst(), 'u')) {
+            // Init the username and service
+            user = opt2.getSecond();
+        } else if(Objects.equals(opt2.getFirst(), 's')) {
+            // Init the username and service
+            service = opt2.getSecond();
         }
         
-        // Runs the CHAP protocol
-        CHAP();
-       
+        Tuple<Character, String> opt3 = op.getLongOpt(false);
+        if(opt3 != null && Objects.equals(opt3.getFirst(), 's')) {
+            // Init the username and service
+            service = opt3.getSecond();
+        } 
         
+        // Check the service type and operate such.
+        if(service.equalsIgnoreCase("echoservice")) { // KDC
+            // Runs the CHAP protocol
+            CHAP();
+        } // If we do the bonus then we add another condition here.
+        
+       
     }
     
     /**
@@ -84,7 +106,7 @@ public class SSOClient {
         Host host = getHost("kdcd");
         
         // MESSAGE 1
-        CHAPClaim claim = new CHAPClaim(usrName); // Construct the packet
+        CHAPClaim claim = new CHAPClaim(user); // Construct the packet
         Communication.connectAndSend(host.getAddress(), host.getPort(), claim); // Send the packet
        
         
