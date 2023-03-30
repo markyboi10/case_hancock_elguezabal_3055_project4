@@ -154,6 +154,9 @@ public class SSOClient {
         byte[] clientHashPass = pw.getBytes(StandardCharsets.UTF_8);
         byte[] clientHashNonce = chapChallenge_Packet.getNonce().getBytes(StandardCharsets.UTF_8);
         byte[] combined = new byte[clientHashPass.length + clientHashNonce.length];
+        System.arraycopy(clientHashPass, 0, combined, 0, clientHashPass.length);
+        System.arraycopy(clientHashNonce, 0, combined, clientHashPass.length, clientHashNonce.length);
+        combined = digest.digest(combined);
         CHAPResponse response = new CHAPResponse(Base64.getEncoder().encodeToString(combined));
         Communication.send(peerSocket, response);
         
