@@ -15,6 +15,9 @@ import merrimackutil.json.types.JSONType;
  * @author William Hancock
  */
 public class SessionKeyResponse implements Packet, JSONSerializable {
+    
+    private final static PacketType packetType = PacketType.SessionKeyResponse;
+    
     private long createTime;
     private long validityTime;
     private String uName;
