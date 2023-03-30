@@ -67,6 +67,7 @@ public class SSOClient {
        
         
 
+        /**
         // Extract nonce
         String ExtractedNonce = "";
         Pattern pattern = Pattern.compile("nonce is: (\\S+)");
@@ -76,6 +77,8 @@ public class SSOClient {
         } else {
             System.exit(0);
         }
+        * 
+        
 
         // Client sends hashed password and nonce
         //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
@@ -98,6 +101,8 @@ public class SSOClient {
         System.out.println(recvMsg3);
         //send the session key request
         //we need to send a packet containing the username and the svc name
+        *
+        **/
     }
     
     /**
@@ -123,9 +128,9 @@ public class SSOClient {
             recv = new Scanner(sock.getInputStream());
             send = new PrintWriter(sock.getOutputStream(), true);
         } catch (UnknownHostException ex) {
-            System.out.println("Host is unknown.");
-            return;
+            System.out.println("Host ["+host_name+"] connected could not be established.");
         } catch (IOException ioe) {
+            System.out.println("Host ["+host_name+"] connected could not be established.");
             ioe.printStackTrace();
         }
     }

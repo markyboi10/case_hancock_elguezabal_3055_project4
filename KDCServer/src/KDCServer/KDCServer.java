@@ -43,6 +43,8 @@ public class KDCServer {
     private static String user;
     private static String secret;
 
+    private static ServerSocket server;
+    
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
     private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
 
@@ -77,20 +79,18 @@ public class KDCServer {
         try {
             System.out.println(config.getPort());
             System.out.println("Amount of Secrets " + secrets.size());
-//            ServerSocket server = new ServerSocket(config.getPort());
-            ServerSocket server = new ServerSocket(config.getPort());
+            // Initializie the server with the config port
+            server = new ServerSocket(config.getPort());
 
+            // Accept packets & communicate
+            poll();
+            
             // Loop forever handing connections.
+            /**
             while (true) {
-                // Wait for a connection.
-                Socket sock = server.accept();
+                
 
-                System.out.println("Connection received.");
-
-                // Setup the streams for use.
-                Scanner recv = new Scanner(sock.getInputStream());
-                PrintWriter send = new PrintWriter(sock.getOutputStream(), true);
-
+                /**
                 // Random nonce       
                 NonceCache nc = new NonceCache(32, 30);
                 byte[] nonceBytes = nc.getNonce();
@@ -101,7 +101,7 @@ public class KDCServer {
 
                 // Check if user exists and demand password + send nonce if correct,
                 // error otherwise
-                /**
+                
                 for (JsonNode secretNode : JSONSecrets()) {
                     String userName = secretNode.get("user").asText();
                     // Check if the current user is the one you're looking for
@@ -131,13 +131,28 @@ public class KDCServer {
                         send.println("User Error, name not found");
                         System.exit(0);
                     }
-                }**/
+                }
 
                 // Close the connection.
-                sock.close();
-            }
+            }**/
         } catch (IOException ioe) {
             ioe.printStackTrace();
+            server.close();
+            System.out.println("KDC Server IOException error, closing down.");
+            System.exit(0);
+        }
+        
+    }
+    
+    private static void poll() throws IOException {
+        while(true) { // Consistently accept connections
+            
+            // Establish the connection & read the message
+            Socket peer = server.accept();
+            // Determine the packet type.
+            
+            // Close the connection
+            server.close();
         }
     }
     
