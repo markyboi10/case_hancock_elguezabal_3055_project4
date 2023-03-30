@@ -4,11 +4,8 @@ package KDCServer;
  *
  * @author Mark Case, William Hancock
  */
-import packets.SessionKeyResponse;
 import KDCServer.config.Config;
 import KDCServer.crypto.GCMEncrypt;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.Socket;
@@ -17,14 +14,10 @@ import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -36,6 +29,7 @@ import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.NonceCache;
 import merrimackutil.util.Tuple;
+import packets.SessionKeyResponse;
 
 public class KDCServer {
 
@@ -139,7 +133,7 @@ public class KDCServer {
     //this is the part where session key is sent to client 
     private static void sendSessionKey(String uname, String sName, String pw){
         //validity period comes from config file  
-        Ticket toSend = new Ticket(System.currentTimeMillis(), 0, uname, sName);
+        SessionKeyResponse toSend = new SessionKeyResponse(System.currentTimeMillis(), 0, uname, sName);
         try {
             Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, toSend.getValidityTime(), toSend.getCreateTime(), uname, sName);
             toSend.seteSKey(keyiv.getFirst());
