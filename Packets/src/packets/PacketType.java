@@ -8,8 +8,9 @@ import java.util.Arrays;
  * @author Alex
  */
 public enum PacketType {
-        
-      SessionKeyResponse(packets.SessionKeyResponse.class) 
+    
+      SessionKeyResponse(packets.SessionKeyResponse.class),
+      CHAPClaim(packets.CHAPClaim.class) 
       ;
 
       

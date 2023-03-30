@@ -8,6 +8,7 @@ import merrimackutil.json.types.JSONType;
 
 public class Host implements JSONSerializable {
         
+    // Host Data
     private String host_name;
     private String address;
     private int port;
@@ -18,7 +19,7 @@ public class Host implements JSONSerializable {
 
     @Override
     public String serialize() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return toJSONType().getFormattedJSON(); // Should never be called
     }
 
     @Override
@@ -29,7 +30,7 @@ public class Host implements JSONSerializable {
             if(obj.containsKey("host-name")) {
                 this.host_name = obj.getString("host-namename");
             } else { throw new InvalidObjectException("Expected an Host object -- host-name expected."); }
-            
+                        
             if(obj.containsKey("address")) {
                 this.address = obj.getString("address");
             } else { throw new InvalidObjectException("Expected an Host object -- address expected."); }
