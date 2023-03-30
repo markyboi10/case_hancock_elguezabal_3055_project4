@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
+import packets.CHAPClaim;
 import ssoclient.config.Config;
 import ssoclient.config.Host;
 
@@ -72,10 +73,10 @@ public class SSOClient {
 
         // Prompt the user for a string to send.
         System.out.print("Username: ");
-        String msg = scan.nextLine();
+        packets.CHAPClaim claim = new CHAPClaim(usrName);
 
         // Send username
-        send.println(msg);
+        send.println(claim.send());
 
         // KDC checks username validity and if valid, demands password and gives a nonce
         String recvMsg = recv.nextLine();
