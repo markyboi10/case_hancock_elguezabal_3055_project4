@@ -45,6 +45,8 @@ public class Communication {
             throw new NullPointerException("No packet called ["+identifier+"] found.");
         }
         
+        
+        
     }
     
 }

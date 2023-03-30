@@ -150,11 +150,15 @@ public class KDCServer {
             // Establish the connection & read the message
             Socket peer = server.accept();
             // Determine the packet type.
+           
+            
             
             // Close the connection
             server.close();
         }
     }
+    
+    
     
     //this is the part where session key is sent to client 
     private static void sendSessionKey(String uname, String sName, String pw){
