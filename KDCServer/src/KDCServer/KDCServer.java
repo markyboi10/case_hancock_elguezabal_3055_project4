@@ -44,7 +44,7 @@ public class KDCServer {
     private static SecretsConfig secretsConfig;
 
     private static ServerSocket server;
-    private static String nonce;
+    //private static String nonce;
     
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
     private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
@@ -86,9 +86,9 @@ public class KDCServer {
             // Accept packets & communicate
             poll();
 
-            NonceCache nc = new NonceCache(32, 30);
-            byte[] nonceBytes = nc.getNonce();
-            nonce = Base64.getEncoder().encodeToString(nonceBytes);
+//            NonceCache nc = new NonceCache(32, 30);
+//            byte[] nonceBytes = nc.getNonce();
+//            nonce = Base64.getEncoder().encodeToString(nonceBytes);
 
 
             // Loop forever handing connections.
@@ -164,6 +164,9 @@ public class KDCServer {
     private static void poll() throws IOException, NoSuchMethodException {
         while(true) { // Consistently accept connections
             
+            NonceCache nc = new NonceCache(32, 30);
+            byte[] nonceBytes = nc.getNonce();
+            String nonce = Base64.getEncoder().encodeToString(nonceBytes);
             // Establish the connection & read the message
             Socket peer = server.accept();
             // Determine the packet type.
