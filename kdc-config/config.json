@@ -1,5 +1,5 @@
 {
-  "secrets-file" : "server-config/secrets.json",
+  "secrets-file" : "kdc-config/secrets.json",
   "port" : 5000,
   "debug" : false,
   "validity-period" : "60000"

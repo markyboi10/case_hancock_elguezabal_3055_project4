@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package KDCServer.config;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InvalidObjectException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -32,7 +27,7 @@ public class SecretsConfig implements JSONSerializable {
         File file = new File(path);
         
         if(file == null || !file.exists()) {
-            throw new FileNotFoundException("File from path for EchoServiceConfig does not point to a vadlid configuration json file.");
+            throw new FileNotFoundException("File from path for SecretsConfig does not point to a vadlid configuration json file.");
         }
         
         // Construct JSON Object and load hosts

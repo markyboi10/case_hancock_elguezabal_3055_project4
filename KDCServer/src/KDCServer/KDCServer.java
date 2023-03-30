@@ -69,11 +69,14 @@ public class KDCServer {
         } else if (Objects.equals(opt.getFirst(), 'c')) {
            // Initialize config
            config = new Config(opt.getSecond());
+           // Initialize the Secrets config from the path "secrets_file" of config.
+           secretsConfig = new SecretsConfig(config.getSecrets_file());
         }
        
 
         try {
             System.out.println(config.getPort());
+            System.out.println("Amount of Secrets " + secrets.size());
 //            ServerSocket server = new ServerSocket(config.getPort());
             ServerSocket server = new ServerSocket(config.getPort());
 
