@@ -22,7 +22,7 @@ import packets.SessionKeyResponse;
 
 /**
  * Utility class used for sending packets across servers
- * @author elguezabala
+ * @author Alex Elguezabal
  */
 public class Communication {
     

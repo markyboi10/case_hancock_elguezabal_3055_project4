@@ -33,6 +33,8 @@ import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.NonceCache;
 import merrimackutil.util.Tuple;
+import packets.CHAPChallenge;
+import packets.CHAPClaim;
 import packets.Packet;
 import packets.SessionKeyResponse;
 
@@ -42,8 +44,6 @@ public class KDCServer {
     
     public static ArrayList<Secrets> secrets = new ArrayList<>();
     private static SecretsConfig secretsConfig;
-    private static String user;
-    private static String secret;
 
     private static ServerSocket server;
     
@@ -164,8 +164,22 @@ public class KDCServer {
             Socket peer = server.accept();
             // Determine the packet type.
            
-            Packet packet = Communication.read(peer);
-            
+            final Packet packet = Communication.read(peer);
+            // Switch statement only goes over packets expected by the KDC, any other packet will be ignored.
+            switch(packet.getType()) {
+                
+                case CHAPClaim: {
+                    // Check if the user exists in the secretes && send a challenge back.
+                    CHAPClaim chapClaim_packet = (CHAPClaim) packet;
+                    if(secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
+                        CHAPChallenge chapChallenge_packet = new CHAPChallenge("NONCE GOES HERE");
+                        Communication.send(peer, chapChallenge_packet);
+                    }
+                }; break;
+                
+                
+                
+            }
             
             // Close the connection
             server.close();
