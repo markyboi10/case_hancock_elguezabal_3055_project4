@@ -158,7 +158,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
         
-        object.put("packetType", this.packetType.toString());
+        object.put("packetType", this.packetType.toString()); // MUST BE PRESENT FOR ALL PACKETS
         object.put("createTime", ""+this.createTime);
         object.put("validityTime", ""+this.validityTime);
         object.put("uName", this.uName);

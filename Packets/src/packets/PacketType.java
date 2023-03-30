@@ -8,7 +8,7 @@ import java.util.Arrays;
  * @author Alex
  */
 public enum PacketType {
-    
+        
       SessionKeyResponse(packets.SessionKeyResponse.class) 
       ;
 
