@@ -19,7 +19,7 @@ import merrimackutil.json.types.JSONType;
 
 /**
  *
- * @author Alex
+ * @author Mark
  */
 public class SecretsConfig implements JSONSerializable {
     
@@ -77,7 +77,7 @@ public class SecretsConfig implements JSONSerializable {
         
         arr.addAll(KDCServer.KDCServer.secrets); // Add all hosts to the array.
         
-        obj.put("hosts", arr); // Assign the hosts array.
+        obj.put("secrets", arr); // Assign the hosts array.
         return obj; // We are never reading this file to JSON.
     }
 
