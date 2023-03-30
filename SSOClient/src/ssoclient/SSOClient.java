@@ -1,6 +1,7 @@
 package ssoclient;
 
 import communication.Communication;
+import java.io.Console;
 import java.io.FileNotFoundException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -22,6 +23,8 @@ import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
 import packets.CHAPChallenge;
 import packets.CHAPClaim;
+import packets.CHAPResponse;
+import packets.CHAPStatus;
 import ssoclient.config.Config;
 import ssoclient.config.Host;
 
@@ -80,13 +83,7 @@ public class SSOClient {
         * 
         
 
-        // Client sends hashed password and nonce
-        //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
-        String msg2 = scan.nextLine();
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] clientHashPass = msg2.getBytes(StandardCharsets.UTF_8);
-        byte[] clientHashNonce = ExtractedNonce.getBytes(StandardCharsets.UTF_8);
-        byte[] combined = new byte[clientHashPass.length + clientHashNonce.length];
+        
         
         System.arraycopy(clientHashPass, 0, combined, 0, clientHashPass.length);
         System.arraycopy(clientHashNonce, 0, combined, clientHashPass.length, clientHashNonce.length);
@@ -136,7 +133,7 @@ public class SSOClient {
      * All protocols should be ran on one single thread.
      * @return boolean value on if the chap protocol finished correctly
      */
-    private static boolean CHAP() throws IOException, NoSuchMethodException {
+    private static boolean CHAP() throws IOException, NoSuchMethodException, NoSuchAlgorithmException {
        
         // MESSAGE 1
         CHAPClaim claim = new CHAPClaim(usrName); // Construct the packet
@@ -146,7 +143,26 @@ public class SSOClient {
         // MESSAGE 2
         CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peerSocket); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
         
+        // MESSAGE 3
+        // Client sends hashed password and nonce
+        //https://stackoverflow.com/questions/12076165/how-to-obscure-scanner-input-text
+        //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
+        Console console = System.console();
+        String pw = new String(console.readPassword("KDC Password: "));
+        //Concatenate Password+Nonce and hash
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] clientHashPass = pw.getBytes(StandardCharsets.UTF_8);
+        byte[] clientHashNonce = chapChallenge_Packet.getNonce().getBytes(StandardCharsets.UTF_8);
+        byte[] combined = new byte[clientHashPass.length + clientHashNonce.length];
+        CHAPResponse response = new CHAPResponse(Base64.getEncoder().encodeToString(combined));
+        Communication.send(peerSocket, response);
         
+        //MESSAGE 4
+        //Receive the status message
+        CHAPStatus chapStatus_Packet = (CHAPStatus) Communication.read(peerSocket);
+        if (chapStatus_Packet.getMsg() == false) {
+            return false;
+        }
         return true; // completed CHAP
     }    
     
