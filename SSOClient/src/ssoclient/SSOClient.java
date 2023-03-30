@@ -28,8 +28,11 @@ public class SSOClient {
     private static Config config;
     private static String svcName;
     private static String usrName;
-
-    private static final PORT = 5099;
+    
+    private static Scanner scan = new Scanner(System.in);
+    private static Socket sock;
+    private static Scanner recv;
+    private static PrintWriter send;
     
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
         //temporarily commented out, will be needed in the final version  
@@ -54,37 +57,15 @@ public class SSOClient {
             config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
         }
         
-        Scanner scan = new Scanner(System.in);
-        Socket sock;
-        Scanner recv = null;
-        PrintWriter send = null;
-
-        try {
-            // Set up a connection to the echo server running on the same machine.
-            sock = new Socket("127.0.0.1", 5000);
-
-            // Set up the streams for the socket.
-            recv = new Scanner(sock.getInputStream());
-            send = new PrintWriter(sock.getOutputStream(), true);
-        } catch (UnknownHostException ex) {
-            System.out.println("Host is unknown.");
-            return;
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-
-     
         
-        packets.CHAPClaim claim = new CHAPClaim(usrName);
-
-        // Send username
-        send.println(claim.send());
+        
+        // Connect to the KDC_Server
+        connectWithServer("kdcd");
+        // Runs the CHAP protocol
+        CHAP();
+        
        
-        // KDC checks username validity and if valid, demands password and gives a nonce
-        String recvMsg = recv.nextLine();
-        System.out.println("""
-                           Server Said: 
-                           """ + recvMsg);
+        
 
         // Extract nonce
         String ExtractedNonce = "";
@@ -118,4 +99,53 @@ public class SSOClient {
         //send the session key request
         //we need to send a packet containing the username and the svc name
     }
+    
+    /**
+     * Connects to a server based off of {@code host_name} 
+     * Looks up the server in hosts array.
+     * @param host_name 
+     */
+    private static void connectWithServer(String host_name) {
+        // Construct socket variables.
+        try {
+            // Get the responsable host.
+            Host host = hosts.stream().filter(n -> n.getHost_name().equalsIgnoreCase(host_name)).findFirst().orElse(null);
+            
+            if(host == null) {
+                System.out.println("Host with name ["+host_name+"] is unknown.");
+                return;
+            }
+            
+            // Set up a connection to the echo server running on the same machine.
+            sock = new Socket(host.getAddress(), host.getPort());
+
+            // Set up the streams for the socket.
+            recv = new Scanner(sock.getInputStream());
+            send = new PrintWriter(sock.getOutputStream(), true);
+        } catch (UnknownHostException ex) {
+            System.out.println("Host is unknown.");
+            return;
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+    
+    /**
+     * Runs the CHAP-modified for JSON protocol.
+     * All protocols should be ran on one single thread.
+     * @return boolean value on if the chap protocol finished correctly
+     */
+    private static boolean CHAP() {
+       
+        // MESSAGE 1
+        packets.CHAPClaim claim = new CHAPClaim(usrName);
+        send.println(claim.send()); // send username
+       
+        // KDC checks username validity and if valid, demands password and gives a nonce
+        String recvMsg = recv.nextLine();
+               
+        
+        return true; // completed CHAP
+    }    
+    
 }
