@@ -20,17 +20,17 @@ public class CHAPStatus implements Packet, JSONSerializable {
     private final static PacketType packetType = PacketType.CHAPClaim;
     
     // Packet Data
-    private String msg;
+    private boolean msg;
 
     /**
      * Default Constructor for a SessionKeyResponse
      * @param msg
      */
-    public CHAPStatus(String msg) {
+    public CHAPStatus(boolean msg) {
         this.msg = msg;
     }
 
-    public String getMsg() {
+    public boolean getMsg() {
         return msg;
     }
 
@@ -70,7 +70,7 @@ public class CHAPStatus implements Packet, JSONSerializable {
           {
             tmp = (JSONObject)obj;
             if (tmp.containsKey("msg"))
-              this.msg = tmp.getString("msg");
+              this.msg = tmp.getBoolean("msg");
             else
               throw new InvalidObjectException("Expected an Ticket object -- msg expected.");
           }
