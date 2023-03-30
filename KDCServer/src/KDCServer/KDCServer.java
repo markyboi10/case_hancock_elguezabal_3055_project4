@@ -5,6 +5,8 @@ package KDCServer;
  * @author Mark Case, William Hancock
  */
 import KDCServer.config.Config;
+import KDCServer.config.Secrets;
+import KDCServer.config.SecretsConfig;
 import KDCServer.crypto.GCMEncrypt;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,6 +20,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -33,7 +36,12 @@ import packets.SessionKeyResponse;
 
 public class KDCServer {
 
-    private static String[] userAndPass = {"Alice", "123321"};
+//    private static String[] userAndPass = {"Alice", "123321"};
+    
+    public static ArrayList<Secrets> secrets = new ArrayList<>();
+    private static SecretsConfig secretsConfig;
+    private static String user;
+    private static String secret;
 
     //private static File secretsFile = new File(System.getProperty("user.home") + File.separator + "case_hancock_elguezabal_3055_project4-master\\test-data\\kdc-config\\secrets.json");
     private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
