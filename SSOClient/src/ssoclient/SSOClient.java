@@ -29,6 +29,8 @@ public class SSOClient {
     private static String svcName;
     private static String usrName;
 
+    private static final PORT = 5099;
+    
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException {
         //temporarily commented out, will be needed in the final version  
         

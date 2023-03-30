@@ -11,13 +11,13 @@ public interface Packet {
      * A packet is a byte[], we are using JSON to store the packet data.
      * @return A byte[] of packet information
      */    
-    public byte[] send();
+    public String send();
     
     /**
      * Constructs an object T based off of the given packet
      * Generally, this should be used when reading packets in.
      * @param packet input byte[]
      */
-    public void recieve(byte[] packet);
+    public void recieve(String packet);
     
 }

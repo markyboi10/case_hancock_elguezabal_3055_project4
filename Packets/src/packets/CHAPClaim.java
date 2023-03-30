@@ -39,7 +39,7 @@ public class CHAPClaim implements Packet, JSONSerializable {
      * @param packet byte[] of information representing this packet
      * @throws InvalidObjectException Thrown if {@code object} is not a Ticket JSONObject
      */
-    public CHAPClaim(byte[] packet) throws InvalidObjectException {
+    public CHAPClaim(String packet, PacketType packetType1) throws InvalidObjectException {
         recieve(packet);
     }
 
@@ -101,10 +101,10 @@ public class CHAPClaim implements Packet, JSONSerializable {
      * @return A byte[] of packet information
      */    
     @Override
-    public byte[] send() {
+    public String send() {
         
         String jsonString = serialize(); // Convert to String from this class.
-        return Base64.getDecoder().decode(jsonString); // Convert JSON string to byte[]
+        return jsonString; // Convert JSON string to byte[]
     }
 
     /**
@@ -113,14 +113,13 @@ public class CHAPClaim implements Packet, JSONSerializable {
      * @param packet input byte[]
      */
     @Override
-    public void recieve(byte[] packet) {
+    public void recieve(String packet) {
         
         try {
-             String jsonString = Base64.getEncoder().encodeToString(packet); // Convert byte[] to string
-             JSONObject jsonObject = JsonIO.readObject(jsonString); // String to JSONObject
+             JSONObject jsonObject = JsonIO.readObject(packet); // String to JSONObject
              deserialize(jsonObject); // Deserialize jsonObject
         } catch (InvalidObjectException ex) {
-            Logger.getLogger(CHAPClaim.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionKeyResponse.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
