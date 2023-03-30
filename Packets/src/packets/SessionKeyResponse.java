@@ -16,8 +16,10 @@ import merrimackutil.json.types.JSONType;
  */
 public class SessionKeyResponse implements Packet, JSONSerializable {
     
+    // Packet Type
     private final static PacketType packetType = PacketType.SessionKeyResponse;
     
+    // Packet Data
     private long createTime;
     private long validityTime;
     private String uName;
@@ -26,7 +28,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     private byte[] eSKey;
 
     /**
-     * Default Constructor for a Ticket
+     * Default Constructor for a SessionKeyResponse
      * @param createTime
      * @param validityTime
      * @param uName
@@ -43,6 +45,13 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
         this.eSKey = eSKey;
     }
     
+    /**
+     * Overloaded Constructor
+     * @param createTime
+     * @param validityTime
+     * @param uName
+     * @param sName 
+     */
     public SessionKeyResponse(long createTime, long validityTime, String uName, String sName) {
         this.createTime = System.currentTimeMillis();
         this.validityTime = validityTime;
@@ -149,6 +158,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
         
+        object.put("packetType", this.packetType.toString());
         object.put("createTime", ""+this.createTime);
         object.put("validityTime", ""+this.validityTime);
         object.put("uName", this.uName);
