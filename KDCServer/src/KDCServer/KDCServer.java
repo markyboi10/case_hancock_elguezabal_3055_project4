@@ -41,6 +41,7 @@ import packets.CHAPResponse;
 import packets.CHAPStatus;
 import packets.Packet;
 import static packets.PacketType.CHAPResponse;
+import packets.SessionKeyRequest;
 import packets.SessionKeyResponse;
 
 public class KDCServer {
@@ -187,7 +188,7 @@ public class KDCServer {
                         NonceCache nc = new NonceCache(32, 30);
                         byte[] nonceBytes = nc.getNonce();
                         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
-                        
+
                         // Create the packet and send
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
@@ -197,7 +198,7 @@ public class KDCServer {
                 break;
                 case CHAPResponse: {
                     CHAPResponse chapResponse_packet = (CHAPResponse) packet; // User's response to challenge, contains combined, hashed pass & nonce
-                   
+
                     // Decompile packet
                     String receivedHash = chapResponse_packet.getHash();
 
@@ -216,7 +217,7 @@ public class KDCServer {
                         System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
                         System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
                         combined = digest.digest(combined);
-                        
+
                         // Our final hash
                         String serverCombinedHash = Base64.getEncoder().encodeToString(combined);
 
@@ -237,6 +238,32 @@ public class KDCServer {
                     }
 
                 }
+                ;
+                break;
+                case SessionKeyRequest: {
+                    //String pw2 = "";
+                    SessionKeyRequest SessionKeyRequest_packet = (SessionKeyRequest) packet; //Receive packet containing username and service name
+                    // https://stackoverflow.com/questions/31789279/how-can-one-find-an-item-after-the-match-using-streams
+                    secrets.stream() // create stream of secret objects in coll.
+                            .filter(n -> n.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getuName())) //If secret.username == packet.username equals
+                            .findFirst() // first secreet obj that matches if statement 
+                            .ifPresent(n -> {
+                                System.out.println("Secret pw associated with user: " + n.getUser());
+                                String pw = n.getSecret(); // get secret associated to the username 
+                                String user = n.getUser();
+                                String sessionName = SessionKeyRequest_packet.getsName();
+                                sendSessionKey(user, sessionName, pw);
+
+                                try {
+                                    //SessionKeyResponse chapStatus_packet = new SessionKeyResponse(sendSessionKey(user, sessionName, pw));
+                                    Communication.send(peer, sendSessionKey(user, sessionName, pw));
+                                } catch (IOException ex) {
+                                    Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            });
+                }
+                ;
+                break;
 
             }
 
@@ -248,7 +275,7 @@ public class KDCServer {
 
     
     //this is the part where session key is sent to client 
-    private static void sendSessionKey(String uname, String sName, String pw){
+    private static SessionKeyResponse sendSessionKey(String uname, String sName, String pw){
         //validity period comes from config file  
         SessionKeyResponse toSend = new SessionKeyResponse(System.currentTimeMillis(), 0, uname, sName);
         try {
@@ -259,6 +286,8 @@ public class KDCServer {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
             Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        return toSend;
         
     }
 
