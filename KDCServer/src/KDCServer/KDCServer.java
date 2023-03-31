@@ -144,6 +144,9 @@ public class KDCServer {
 
     }
 
+    // Gobal noncecache, holding nonces.
+    private static NonceCache nc = new NonceCache(32, 30);
+    
     /**
      * Waits for a connection with a peer socket, then polls for a message being
      * sent. Each iteration of the loop operates for one message, as not to
@@ -172,7 +175,6 @@ public class KDCServer {
                     if (secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
 
                         // Construct the nonce
-                        NonceCache nc = new NonceCache(32, 30);
                         byte[] nonceBytes = nc.getNonce();
                         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
 
@@ -200,7 +202,7 @@ public class KDCServer {
                         byte[] secretHashPass = secret.getSecret().getBytes(StandardCharsets.UTF_8);
                         byte[] clientHashNonce = nonceBytes;
                         byte[] combined = new byte[secretHashPass.length + clientHashNonce.length];
-
+                        
                         System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
                         System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
                         combined = digest.digest(combined);
