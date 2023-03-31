@@ -91,20 +91,23 @@ public class SSOClient {
         }
         
         // Check the service type and operate such.
-        if(service.equalsIgnoreCase("echoservice")) { // KDC
+        if(service.equalsIgnoreCase("echoservice")) { // KDC --> EchoService
+            
+            System.out.println("Running Chap.");
+            
             // Runs the CHAP protocol
-            CHAP();
+            // If chap returns true, run session key request
+            if (CHAP()) {
+                SessionKeyRequest();
+            } else { // If chap returns false
+                System.exit(0);
+            }
+
         } else {
             System.out.println("Service not found with name ["+service+"]. Closing program ");
             System.exit(0);
         } // If we do the bonus then we add another condition here.
         
-        // If chap returns true, run session key request
-        if (CHAP()) {
-            SessionKeyRequest();
-        } else { // If chap returns false
-            System.exit(0);
-        }
         
        
     }
@@ -127,9 +130,13 @@ public class SSOClient {
         Host host = getHost("kdcd");
         
         // MESSAGE 1
+        System.out.println("creating claim");
         CHAPClaim claim = new CHAPClaim(user); // Construct the packet
+        System.out.println("sending packet");
         Socket peer1 = Communication.connectAndSend(host.getAddress(), host.getPort(), claim); // Send the packet
                
+        
+        System.out.println("reading packet");
         // MESSAGE 2
         CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peer1); // Read for a packet  // KDC checks recieved hash by hashing its version of the password and nonce
         
