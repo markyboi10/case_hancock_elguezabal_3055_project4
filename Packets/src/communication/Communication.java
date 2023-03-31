@@ -1,6 +1,8 @@
 package communication;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -34,7 +36,8 @@ public class Communication {
      * @throws IOException 
      */
     public static void send(Socket peer, Packet message) throws IOException {
-        new PrintWriter(peer.getOutputStream(), true).print(message.send());
+        new PrintWriter(peer.getOutputStream(), true).println(message.send());
+        peer.getOutputStream().flush(); // Flush after each message
     }
     
     /**
@@ -50,6 +53,7 @@ public class Communication {
         try {
             // Set up a connection to the echo server running on the same machine.
             peerSocket = new Socket(address, port);
+            System.out.println("Connecting to : "+address+":" + port);
         } catch (UnknownHostException ex) {
             System.out.println("Host ["+address+" "+port+"] connected could not be established.");
         } catch (IOException ioe) {
@@ -71,11 +75,12 @@ public class Communication {
      * @throws NoSuchMethodException 
      */
     public static Packet read(Socket peer) throws IOException, NoSuchMethodException {
-        Scanner scanner = new Scanner(peer.getInputStream());
+        BufferedReader br = new BufferedReader(new InputStreamReader(peer.getInputStream()));
         
         // Input from peer
-        String line = scanner.nextLine(); // Blocking call, will not run anything until this finished on thread.
-    
+        String line = br.readLine(); // Blocking call, will not run anything until this finished on thread.
+        System.out.println(line);
+        
         // Determine the type of packet.
         JSONObject object = JsonIO.readObject(line); // All packets are type JSON object with identifier "packetType"
         String identifier = object.getString("packetType");
@@ -97,6 +102,7 @@ public class Communication {
             case CHAPClaim: return new CHAPClaim(line, packetType);
             default: return null;
         }    
+        
     }
     
 }

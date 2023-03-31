@@ -158,7 +158,11 @@ public class KDCServer {
             Socket peer = server.accept();
 
             // Determine the packet type.
+            System.out.println("Waiting for a packet...");
             final Packet packet = Communication.read(peer);
+            
+            System.out.println("Packet Recieved: ["+packet.getType().name()+"]");
+            
             // Switch statement only goes over packets expected by the KDC, any other packet will be ignored.
             switch (packet.getType()) {
 
@@ -249,9 +253,9 @@ public class KDCServer {
                 break;
 
             }
-
+            
             // Close the connection
-            server.close();
+            // server.close();
         }
     }
 
