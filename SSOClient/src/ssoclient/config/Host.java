@@ -28,7 +28,7 @@ public class Host implements JSONSerializable {
             JSONObject obj = (JSONObject) jsont;
             
             if(obj.containsKey("host-name")) {
-                this.host_name = obj.getString("host-namename");
+                this.host_name = obj.getString("host-name");
             } else { throw new InvalidObjectException("Expected an Host object -- host-name expected."); }
                         
             if(obj.containsKey("address")) {
