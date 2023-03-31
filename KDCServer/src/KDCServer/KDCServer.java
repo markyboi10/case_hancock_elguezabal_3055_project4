@@ -245,7 +245,7 @@ public class KDCServer {
             }
             
             // Close the connection
-            server.close();
+            // server.close();
         }
     }
 

@@ -36,7 +36,7 @@ public class Communication {
      * @throws IOException 
      */
     public static void send(Socket peer, Packet message) throws IOException {
-        new PrintWriter(peer.getOutputStream(), true).print(message.send());
+        new PrintWriter(peer.getOutputStream(), true).println(message.send());
         peer.getOutputStream().flush(); // Flush after each message
     }
     
