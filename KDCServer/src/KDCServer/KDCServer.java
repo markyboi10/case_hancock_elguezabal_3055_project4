@@ -51,6 +51,8 @@ public class KDCServer {
     
 
     private static ServerSocket server;
+    //private static String nonce;
+    private static byte[] nonceBytes = null;
     
     //private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
 
@@ -185,7 +187,7 @@ public class KDCServer {
                         NonceCache nc = new NonceCache(32, 30);
                         byte[] nonceBytes = nc.getNonce();
                         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
-
+                        
                         // Create the packet and send
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
@@ -204,16 +206,26 @@ public class KDCServer {
 
                     if (secrets.stream().anyMatch(secret -> {
                         // SHA256 hash of every secret passwords
-                        byte[] secretHashPass = digest.digest(secret.getSecret().getBytes(StandardCharsets.UTF_8));
+                        byte[] secretHashPass = secret.getSecret().getBytes(StandardCharsets.UTF_8);
+                        byte[] clientHashNonce = nonceBytes;
+                        byte[] combined = new byte[secretHashPass.length + clientHashNonce.length];
 
                         /*
                         to do: get original nonce, and hash it so it can combined with secretHashPass and compared
                          */
+                        //Encode nonce
+ 
+
+                        System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
+                        System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
+                        combined = digest.digest(combined);
+                        
+                        String serverCombinedHash = Base64.getEncoder().encodeToString(combined);
                         // Encode hash
-                        String secretHashPassBase64 = Base64.getEncoder().encodeToString(secretHashPass);
+                       // String secretHashPassBase64 = Base64.getEncoder().encodeToString(secretHashPass);
 
                         // Compare with the received hash
-                        return secretHashPassBase64.equalsIgnoreCase(receivedHash);
+                        return serverCombinedHash.equalsIgnoreCase(receivedHash);
                     })) {
                         // Valid password  
                         status = true;
