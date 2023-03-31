@@ -41,7 +41,8 @@ public class scrypt {
             byte[] salt = new byte[16];
             SecureRandom rand = new SecureRandom();
             rand.nextBytes(salt);
-
+            // WHATEVER THIS IS, IT NEEDS TO BE STORED AND SENT FOR DECRYPTION (GETTER OR SUM IDC)!!!
+        
         // Derive an AES key from the password using the password. The memory
         // required to run the derivation, in bytes, is:
         //    128 * COST * BLK_SIZE * PARALLELIZATION.

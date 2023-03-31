@@ -9,12 +9,9 @@ import KDCServer.config.Secrets;
 import KDCServer.config.SecretsConfig;
 import KDCServer.crypto.GCMEncrypt;
 import communication.Communication;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.Socket;
 import java.net.ServerSocket;
-import java.util.Scanner;
-import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
@@ -41,30 +38,29 @@ import packets.CHAPResponse;
 import packets.CHAPStatus;
 import packets.Packet;
 import static packets.PacketType.CHAPResponse;
+import packets.SessionKeyRequest;
 import packets.SessionKeyResponse;
 
 public class KDCServer {
-    
+
     public static ArrayList<Secrets> secrets = new ArrayList<>();
     private static SecretsConfig secretsConfig;
     private static Config config;
-    
 
     private static ServerSocket server;
     //private static String nonce;
     private static byte[] nonceBytes = null;
-    
-    //private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {     
-        
+    //private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
+
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
         ar[0] = new LongOption("config", true, 'c');
         ar[1] = new LongOption("help", false, 'h');
         op.setLongOpts(ar);
         op.setOptString("hc:");
-        Tuple<Character,String> opt = op.getLongOpt(false);
+        Tuple<Character, String> opt = op.getLongOpt(false);
         if (opt == null || Objects.equals(opt.getFirst(), 'h')) {
             System.out.println("usage:\n"
                     + "kdcd\n"
@@ -73,14 +69,13 @@ public class KDCServer {
                     + "options:\n"
                     + " -c, --config Set the config file.\n"
                     + " -h, --help Display the help.");
-           System.exit(0);
+            System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'c')) {
-           // Initialize config
-           config = new Config(opt.getSecond());
-           // Initialize the Secrets config from the path "secrets_file" of config.
-           secretsConfig = new SecretsConfig(config.getSecrets_file());
+            // Initialize config
+            config = new Config(opt.getSecond());
+            // Initialize the Secrets config from the path "secrets_file" of config.
+            secretsConfig = new SecretsConfig(config.getSecrets_file());
         }
-       
 
         try {
             System.out.println(config.getPort());
@@ -94,58 +89,47 @@ public class KDCServer {
 //            NonceCache nc = new NonceCache(32, 30);
 //            byte[] nonceBytes = nc.getNonce();
 //            nonce = Base64.getEncoder().encodeToString(nonceBytes);
-
-
             // Loop forever handing connections.
             /**
-            while (true) {
-                
-
-                /**
-                // Random nonce       
-                NonceCache nc = new NonceCache(32, 30);
-                byte[] nonceBytes = nc.getNonce();
-                String nonce = Base64.getEncoder().encodeToString(nonceBytes);
-
-                // Get the username line from the client.
-                String line = recv.nextLine();
-
-                // Check if user exists and demand password + send nonce if correct,
-                // error otherwise
-                
-                for (JsonNode secretNode : JSONSecrets()) {
-                    String userName = secretNode.get("user").asText();
-                    // Check if the current user is the one you're looking for
-                    if (userName.equals(line)) {
-                        String password = secretNode.get("secret").asText();
-                        // send.println("Enter your password below. Yout nonce is: " + nonce);
-                        send.println(password + " your nonce is: " + nonce);
-                        //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
-                        // Get hashed pass and nonce from client, compare and validate to kdc version
-                        String line2 = recv.nextLine();
-                        send.println("Checking hash . . .");
-                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-                        byte[] hashPass = password.getBytes(StandardCharsets.UTF_8);
-                        byte[] hashNonce = nonce.getBytes(StandardCharsets.UTF_8);
-                        byte[] combined = new byte[hashPass.length + hashNonce.length];
-                        System.arraycopy(hashPass, 0, combined, 0, hashPass.length);
-                        System.arraycopy(hashNonce, 0, combined, hashPass.length, hashNonce.length);
-                        combined = digest.digest(combined);
-                        if (line2.equals(Arrays.toString(combined))) {
-                            send.println("You have been authenticated");
-                            sendSessionKey("", "", password);
-                        } else {
-                            send.println("You have denied");
-                        }
-                        break;
-                    } else {
-                        send.println("User Error, name not found");
-                        System.exit(0);
-                    }
-                }
-
-                // Close the connection.
-            }**/
+             * while (true) {
+             *
+             *
+             * /**
+             * // Random nonce NonceCache nc = new NonceCache(32, 30); byte[]
+             * nonceBytes = nc.getNonce(); String nonce =
+             * Base64.getEncoder().encodeToString(nonceBytes);
+             *
+             * // Get the username line from the client. String line =
+             * recv.nextLine();
+             *
+             * // Check if user exists and demand password + send nonce if
+             * correct, // error otherwise
+             *
+             * for (JsonNode secretNode : JSONSecrets()) { String userName =
+             * secretNode.get("user").asText(); // Check if the current user is
+             * the one you're looking for if (userName.equals(line)) { String
+             * password = secretNode.get("secret").asText(); //
+             * send.println("Enter your password below. Yout nonce is: " +
+             * nonce); send.println(password + " your nonce is: " + nonce);
+             * //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
+             * // Get hashed pass and nonce from client, compare and validate to
+             * kdc version String line2 = recv.nextLine();
+             * send.println("Checking hash . . ."); MessageDigest digest =
+             * MessageDigest.getInstance("SHA-256"); byte[] hashPass =
+             * password.getBytes(StandardCharsets.UTF_8); byte[] hashNonce =
+             * nonce.getBytes(StandardCharsets.UTF_8); byte[] combined = new
+             * byte[hashPass.length + hashNonce.length];
+             * System.arraycopy(hashPass, 0, combined, 0, hashPass.length);
+             * System.arraycopy(hashNonce, 0, combined, hashPass.length,
+             * hashNonce.length); combined = digest.digest(combined); if
+             * (line2.equals(Arrays.toString(combined))) { send.println("You
+             * have been authenticated"); sendSessionKey("", "", password); }
+             * else { send.println("You have denied"); } break; } else {
+             * send.println("User Error, name not found"); System.exit(0); } }
+             *
+             * // Close the connection.
+            }*
+             */
         } catch (IOException ioe) {
             ioe.printStackTrace();
             server.close();
@@ -157,9 +141,9 @@ public class KDCServer {
             System.out.println("KDC Server IOException error, closing down.");
             System.exit(0);
         }
-        
+
     }
-        
+
     /**
      * Waits for a connection with a peer socket, then polls for a message being
      * sent. Each iteration of the loop operates for one message, as not to
@@ -191,7 +175,7 @@ public class KDCServer {
                         NonceCache nc = new NonceCache(32, 30);
                         byte[] nonceBytes = nc.getNonce();
                         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
-                        
+
                         // Create the packet and send
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
@@ -201,7 +185,7 @@ public class KDCServer {
                 break;
                 case CHAPResponse: {
                     CHAPResponse chapResponse_packet = (CHAPResponse) packet; // User's response to challenge, contains combined, hashed pass & nonce
-                   
+
                     // Decompile packet
                     String receivedHash = chapResponse_packet.getHash();
 
@@ -220,7 +204,7 @@ public class KDCServer {
                         System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
                         System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
                         combined = digest.digest(combined);
-                        
+
                         // Our final hash
                         String serverCombinedHash = Base64.getEncoder().encodeToString(combined);
 
@@ -241,6 +225,32 @@ public class KDCServer {
                     }
 
                 }
+                ;
+                break;
+                case SessionKeyRequest: {
+                    //String pw2 = "";
+                    SessionKeyRequest SessionKeyRequest_packet = (SessionKeyRequest) packet; //Receive packet containing username and service name
+                    // https://stackoverflow.com/questions/31789279/how-can-one-find-an-item-after-the-match-using-streams
+                    secrets.stream() // create stream of secret objects in coll.
+                            .filter(n -> n.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getuName())) //If secret.username == packet.username equals
+                            .findFirst() // first secreet obj that matches if statement 
+                            .ifPresent(n -> {
+                                System.out.println("Secret pw associated with user: " + n.getUser());
+                                String pw = n.getSecret(); // get secret associated to the username 
+                                String user = n.getUser();
+                                String sessionName = SessionKeyRequest_packet.getsName();
+                                //sendSessionKey(user, sessionName, pw);
+
+                                try {
+                                    //SessionKeyResponse chapStatus_packet = new SessionKeyResponse(sendSessionKey(user, sessionName, pw));
+                                    Communication.send(peer, sendSessionKey(user, sessionName, pw));
+                                } catch (IOException ex) {
+                                    Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            });
+                }
+                ;
+                break;
 
             }
             
@@ -249,10 +259,8 @@ public class KDCServer {
         }
     }
 
-
-    
     //this is the part where session key is sent to client 
-    private static void sendSessionKey(String uname, String sName, String pw){
+    private static SessionKeyResponse sendSessionKey(String uname, String sName, String pw) {
         //validity period comes from config file  
         SessionKeyResponse toSend = new SessionKeyResponse(System.currentTimeMillis(), 0, uname, sName);
         try {
@@ -263,7 +271,9 @@ public class KDCServer {
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
             Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
+        return toSend;
+
     }
 
 }
