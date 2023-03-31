@@ -1,12 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package ClientServerCrypto;
 
-package KDCServer.crypto;
-
-import KDCServer.KDCServer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import org.bouncycastle.jcajce.spec.ScryptKeySpec;
@@ -14,10 +15,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  *
- * @author William Hancock
+ * @author MarkC
  */
 public class scrypt {
-/**
+    /**
      * Derives the AES-128 key from the password.
      * @param password the password to derive the key from
      * @return the AES-128 key
@@ -37,18 +38,20 @@ public class scrypt {
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance("SCRYPT");
 
-        // Get a 16-byte IV for an AES key if it does not exist.
-            byte[] salt = new byte[16];
-            SecureRandom rand = new SecureRandom();
-            rand.nextBytes(salt);
-            // WHATEVER THIS IS, IT NEEDS TO BE STORED AND SENT FOR DECRYPTION (GETTER OR SUM IDC)!!!
+        // THIS NEEDS TO BE THE SAME AS THE ONE USED DURING ENCRYPTION!!!
+        String salt = ""; //needs to be passed over
+       byte salt2[] = salt.getBytes();
         
+//            byte[] salt = new byte[16];
+//            SecureRandom rand = new SecureRandom();
+//            rand.nextBytes(salt);
+
         // Derive an AES key from the password using the password. The memory
         // required to run the derivation, in bytes, is:
         //    128 * COST * BLK_SIZE * PARALLELIZATION.
         // The password argument expects and array of charaters *not* bytes.
         //
-        scryptSpec = new ScryptKeySpec(password.toCharArray(), salt, COST, BLK_SIZE,
+        scryptSpec = new ScryptKeySpec(password.toCharArray(), salt2, COST, BLK_SIZE,
                 PARALLELIZATION, KEY_SIZE);
         
         // Generate the secrete key.
@@ -56,4 +59,5 @@ public class scrypt {
                 scryptSpec);
         return key;
     }
+    
 }
