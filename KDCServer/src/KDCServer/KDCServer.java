@@ -197,45 +197,41 @@ public class KDCServer {
                 break;
                 case CHAPResponse: {
                     CHAPResponse chapResponse_packet = (CHAPResponse) packet; // User's response to challenge, contains combined, hashed pass & nonce
-                    // Check if valid
+                   
+                    // Decompile packet
                     String receivedHash = chapResponse_packet.getHash();
 
+                    // Standard SHA-256
                     MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-                    boolean status = false; //Status of our comparison with recieved hash
+                    boolean status = false; //Status of our comparison with recieved hash, this is returned
 
+                    // For every secret in secrets.json, combine with nonce and hash it. Then check if it equals the recieved hash
                     if (secrets.stream().anyMatch(secret -> {
-                        // SHA256 hash of every secret passwords
+                        // byte array and combine the two like the client did when they sent their challenge response
                         byte[] secretHashPass = secret.getSecret().getBytes(StandardCharsets.UTF_8);
                         byte[] clientHashNonce = nonceBytes;
                         byte[] combined = new byte[secretHashPass.length + clientHashNonce.length];
-
-                        /*
-                        to do: get original nonce, and hash it so it can combined with secretHashPass and compared
-                         */
-                        //Encode nonce
- 
 
                         System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
                         System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
                         combined = digest.digest(combined);
                         
+                        // Our final hash
                         String serverCombinedHash = Base64.getEncoder().encodeToString(combined);
-                        // Encode hash
-                       // String secretHashPassBase64 = Base64.getEncoder().encodeToString(secretHashPass);
 
-                        // Compare with the received hash
+                        // Compare the final hash with the received hash
                         return serverCombinedHash.equalsIgnoreCase(receivedHash);
                     })) {
-                        // Valid password  
+                        // If valid password, boolean is true 
                         status = true;
                         // Create the packet and send
                         CHAPStatus chapStatus_packet = new CHAPStatus(status);
                         Communication.send(peer, chapStatus_packet);
                     } else {
-                        // Invalid password
+                        // If invalid password, boolean remains false
                         // Create the packet and send
-                        CHAPStatus chapStatus_packet = new CHAPStatus(status); // send false
+                        CHAPStatus chapStatus_packet = new CHAPStatus(status);
                         Communication.send(peer, chapStatus_packet);
 
                     }

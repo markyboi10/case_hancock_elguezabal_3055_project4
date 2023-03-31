@@ -124,7 +124,7 @@ public class SSOClient {
         Socket peer1 = Communication.connectAndSend(host.getAddress(), host.getPort(), claim); // Send the packet
                
         // MESSAGE 2
-        CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peer1); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
+        CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peer1); // Read for a packet  // KDC checks recieved hash by hashing its version of the password and nonce
         
         // MESSAGE 3
         // Client sends hashed password and nonce
@@ -147,7 +147,9 @@ public class SSOClient {
         //Receive the status message
         CHAPStatus chapStatus_Packet = (CHAPStatus) Communication.read(peer2);
         if (chapStatus_Packet.getMsg() == false) {
-            return false;
+            System.out.println("Incorrect credentials");
+            System.exit(0);
+            //return false;
         }
         
         System.out.println("GOT TO THE END! :)");
