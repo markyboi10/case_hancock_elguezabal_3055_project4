@@ -44,5 +44,10 @@ public enum PacketType {
                 .orElseGet(null);
     }
       
-    
+    public static PacketType getPacketFromClass(Class classObj) {
+        return Arrays.stream(values())
+                .filter(n -> n.getClass().getName().equalsIgnoreCase(classObj.getName()))
+                .findFirst()
+                .orElseGet(null);
+    }
 }

@@ -15,10 +15,7 @@ import merrimackutil.json.types.JSONType;
  * @author William Hancock
  */
 public class CHAPChallenge implements Packet, JSONSerializable {
-    
-    // Packet Type
-    private final static PacketType packetType = PacketType.CHAPChallenge;
-    
+        
     // Packet Data
     private String nonce;
 
@@ -85,7 +82,7 @@ public class CHAPChallenge implements Packet, JSONSerializable {
     @Override
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
-        object.put("packetType", this.packetType.toString());
+        object.put("packetType", PacketType.getPacketFromClass(this.getClass()).toString());
         object.put("nonce", this.nonce);
 
         return object;
@@ -130,7 +127,7 @@ public class CHAPChallenge implements Packet, JSONSerializable {
      */
     @Override
     public PacketType getType() {
-        return packetType;
+        return PacketType.getPacketFromClass(this.getClass());
     }
     
 }

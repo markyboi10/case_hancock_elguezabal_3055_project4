@@ -15,10 +15,7 @@ import merrimackutil.json.types.JSONType;
  * @author William Hancock
  */
 public class CHAPStatus implements Packet, JSONSerializable {
-    
-    // Packet Type
-    private final static PacketType packetType = PacketType.CHAPStatus;
-    
+        
     // Packet Data
     private boolean msg;
 
@@ -85,7 +82,7 @@ public class CHAPStatus implements Packet, JSONSerializable {
     @Override
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
-        object.put("packetType", this.packetType.toString());
+        object.put("packetType", PacketType.getPacketFromClass(this.getClass()).toString());
         object.put("msg", this.msg);
 
         return object;
@@ -130,6 +127,6 @@ public class CHAPStatus implements Packet, JSONSerializable {
      */
     @Override
     public PacketType getType() {
-        return packetType;
+        return PacketType.getPacketFromClass(this.getClass());
     }
 }
