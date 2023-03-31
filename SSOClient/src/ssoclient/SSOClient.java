@@ -42,14 +42,15 @@ public class SSOClient {
         System.out.println(Arrays.toString(args));
         
         // Initializing the CLI
+        boolean shortlen = false;
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[3];
         ar[0] = new LongOption("hosts", true, 'h');
         ar[1] = new LongOption("user", true, 'u');
         ar[2] = new LongOption("service", true, 's');
         op.setLongOpts(ar);
-        //op.setOptString("hu:us:s:");
-        
+        op.setOptString("h:u:s:");
+
         Tuple<Character, String> opt = op.getLongOpt(false);
         System.out.println(opt.getSecond());
         if (opt == null) {
@@ -62,29 +63,30 @@ public class SSOClient {
                     + "   -s, --service The name of the service");
             System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'h')) {
-            config = new Config(opt.getSecond()); // Construct the config & hosts parameters.
-        } else if(Objects.equals(opt.getFirst(), 'u')) {
-            user = opt.getSecond();
+            System.out.println("h");
+        } else if (Objects.equals(opt.getFirst(), 'u')) {
+            System.out.println("u");
             // If the host is not specified then it is the local hosts.json file
-            config = new Config("hosts.json");
-        } 
-        
+            System.out.println("uu");
+        }
+
         Tuple<Character, String> opt2 = op.getLongOpt(false);
         System.out.println(opt2.getSecond());
-        if(Objects.equals(opt2.getFirst(), 'u')) {
-            // Init the username and service
-            user = opt2.getSecond();
-        } else if(Objects.equals(opt2.getFirst(), 's')) {
-            // Init the username and service
-            service = opt2.getSecond();
+        if (Objects.equals(opt2.getFirst(), 'u')) {
+            System.out.println("u");
+        } else if (Objects.equals(opt2.getFirst(), 's')) {
+            System.out.println("s");
+            shortlen = true;
         }
-        
-        Tuple<Character, String> opt3 = op.getLongOpt(false);
-        System.out.println(opt3.getSecond());
-        if(opt3.getSecond() != null && Objects.equals(opt3.getFirst(), 's')) {
-            // Init the username and service
-            service = opt3.getSecond();
-        } 
+
+        if (shortlen != true) {
+            Tuple<Character, String> opt3 = op.getLongOpt(false);
+            System.out.println(opt3.getSecond());
+            if (opt3.getSecond() != null && Objects.equals(opt3.getFirst(), 's')) {
+                // Init the username and service
+                System.out.println("s");
+            }
+        }
         
         // Check the service type and operate such.
         if(service.equalsIgnoreCase("echoservice")) { // KDC
