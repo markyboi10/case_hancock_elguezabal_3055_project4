@@ -39,6 +39,8 @@ public class SSOClient {
     
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException {
 
+        System.out.println(Arrays.toString(args));
+        
         // Initializing the CLI
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[3];
@@ -46,9 +48,10 @@ public class SSOClient {
         ar[1] = new LongOption("user", true, 'u');
         ar[2] = new LongOption("service", true, 's');
         op.setLongOpts(ar);
-        op.setOptString("h:u:s:");
+        //op.setOptString("hu:us:s:");
         
         Tuple<Character, String> opt = op.getLongOpt(false);
+        System.out.println(opt.getSecond());
         if (opt == null) {
             System.out.println("usage:\n"
                     + "   client --hosts <configfile> --user <user> --service <service>\n"
