@@ -99,6 +99,13 @@ public class SSOClient {
             System.exit(0);
         } // If we do the bonus then we add another condition here.
         
+        // If chap returns true, run session key request
+        if (CHAP()) {
+            SessionKeyRequest();
+        } else { // If chap returns false
+            System.exit(0);
+        }
+        
        
     }
     
@@ -148,8 +155,7 @@ public class SSOClient {
         CHAPStatus chapStatus_Packet = (CHAPStatus) Communication.read(peer2);
         if (chapStatus_Packet.getMsg() == false) {
             System.out.println("Incorrect credentials");
-            System.exit(0);
-            //return false;
+            return false;
         }
         
         System.out.println("GOT TO THE END! :)");
