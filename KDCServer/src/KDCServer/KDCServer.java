@@ -17,8 +17,10 @@ import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
@@ -35,7 +37,10 @@ import merrimackutil.util.NonceCache;
 import merrimackutil.util.Tuple;
 import packets.CHAPChallenge;
 import packets.CHAPClaim;
+import packets.CHAPResponse;
+import packets.CHAPStatus;
 import packets.Packet;
+import static packets.PacketType.CHAPResponse;
 import packets.SessionKeyResponse;
 
 public class KDCServer {
@@ -43,6 +48,7 @@ public class KDCServer {
     public static ArrayList<Secrets> secrets = new ArrayList<>();
     private static SecretsConfig secretsConfig;
     private static Config config;
+    
 
     private static ServerSocket server;
     
@@ -153,46 +159,85 @@ public class KDCServer {
     }
         
     /**
-     * Waits for a connection with a peer socket, then polls for a message being sent.
-     * Each iteration of the loop operates for one message, as not to block multi-peer communication.
-     * 
-     * @throws IOException 
+     * Waits for a connection with a peer socket, then polls for a message being
+     * sent. Each iteration of the loop operates for one message, as not to
+     * block multi-peer communication.
+     *
+     * @throws IOException
      */
-    private static void poll() throws IOException, NoSuchMethodException {
-        while(true) { // Consistently accept connections
-            
+    private static void poll() throws IOException, NoSuchMethodException, NoSuchAlgorithmException {
+        while (true) { // Consistently accept connections
+
             // Establish the connection & read the message
             Socket peer = server.accept();
-            
+
             // Determine the packet type.
             final Packet packet = Communication.read(peer);
             // Switch statement only goes over packets expected by the KDC, any other packet will be ignored.
-            switch(packet.getType()) {
-                
+            switch (packet.getType()) {
+
                 case CHAPClaim: {
                     // Check if the user exists in the secretes && send a challenge back.
                     CHAPClaim chapClaim_packet = (CHAPClaim) packet;
-                    if(secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
-                        
+                    if (secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
+
                         // Construct the nonce
                         NonceCache nc = new NonceCache(32, 30);
                         byte[] nonceBytes = nc.getNonce();
-                        String nonce = Base64.getEncoder().encodeToString(nonceBytes);                        
-                        
+                        String nonce = Base64.getEncoder().encodeToString(nonceBytes);
+
                         // Create the packet and send
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
                     }
-                }; break;
-                
+                }
+                ;
+                break;
+                case CHAPResponse: {
+                    CHAPResponse chapResponse_packet = (CHAPResponse) packet; // User's response to challenge, contains combined, hashed pass & nonce
+                    // Check if valid
+                    String receivedHash = chapResponse_packet.getHash();
+
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+                    boolean status = false; //Status of our comparison with recieved hash
+
+                    if (secrets.stream().anyMatch(secret -> {
+                        // SHA256 hash of every secret passwords
+                        byte[] secretHashPass = digest.digest(secret.getSecret().getBytes(StandardCharsets.UTF_8));
+
+                        /*
+                        to do: get original nonce, and hash it so it can combined with secretHashPass and compared
+                         */
+                        // Encode hash
+                        String secretHashPassBase64 = Base64.getEncoder().encodeToString(secretHashPass);
+
+                        // Compare with the received hash
+                        return secretHashPassBase64.equalsIgnoreCase(receivedHash);
+                    })) {
+                        // Valid password  
+                        status = true;
+                        // Create the packet and send
+                        CHAPStatus chapStatus_packet = new CHAPStatus(status);
+                        Communication.send(peer, chapStatus_packet);
+                    } else {
+                        // Invalid password
+                        // Create the packet and send
+                        CHAPStatus chapStatus_packet = new CHAPStatus(status); // send false
+                        Communication.send(peer, chapStatus_packet);
+
+                    }
+
+                }
+
             }
-          
+
             // Close the connection
             server.close();
         }
     }
-    
-    
+
+
     
     //this is the part where session key is sent to client 
     private static void sendSessionKey(String uname, String sName, String pw){

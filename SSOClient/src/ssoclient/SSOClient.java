@@ -4,9 +4,6 @@ import communication.Communication;
 import java.io.Console;
 import java.io.FileNotFoundException;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Scanner;
-import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
@@ -25,6 +20,9 @@ import packets.CHAPChallenge;
 import packets.CHAPClaim;
 import packets.CHAPResponse;
 import packets.CHAPStatus;
+import static packets.PacketType.SessionKeyResponse;
+import packets.SessionKeyRequest;
+import packets.SessionKeyResponse;
 import ssoclient.config.Config;
 import ssoclient.config.Host;
 
@@ -39,7 +37,7 @@ public class SSOClient {
     
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException {
 
-        System.out.println(Arrays.toString(args));
+        System.out.println("args: " + Arrays.toString(args));
         
         // Initializing the CLI
         boolean shortlen = false;
@@ -155,6 +153,22 @@ public class SSOClient {
         System.out.println("GOT TO THE END! :)");
         
         return true; // completed CHAP
-    }    
+    }   
+    
+    private static boolean SessionKeyRequest() throws IOException, NoSuchMethodException {
+        Host host = getHost("kdcd");
+        
+        // MESSAGE 1: Client sends kdc username and service name
+        SessionKeyRequest req = new SessionKeyRequest(user, service); // Construct the packet
+        Socket socket = Communication.connectAndSend(host.getAddress(), host.getPort(), req); // Send the packet
+        
+         // MESSAGE 2
+        SessionKeyResponse sessKeyResp_Packet = (SessionKeyResponse) Communication.read(socket); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
+        
+        
+        
+        
+        return true;
+    }
     
 }
