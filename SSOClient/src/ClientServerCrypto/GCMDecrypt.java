@@ -5,6 +5,7 @@
 package ClientServerCrypto;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -49,6 +50,7 @@ public class GCMDecrypt {
         try {
             // Put the cipher in encrypt mode with the specified key.
             aesCipher.init(Cipher.DECRYPT_MODE, aesKey, new GCMParameterSpec(tagSize, Base64.getDecoder().decode(IV)));
+            aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
         } catch (InvalidKeyException | InvalidAlgorithmParameterException ex) {
             Logger.getLogger(GCMDecrypt.class.getName()).log(Level.SEVERE, null, ex);
         }
