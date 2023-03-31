@@ -24,7 +24,7 @@ public class scrypt {
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
      */
-    public static SecretKey genKey(String password) throws NoSuchAlgorithmException,
+    public static SecretKey genKey(String password, String uname) throws NoSuchAlgorithmException,
             InvalidKeySpecException {
         final int COST = 2048;          // A.K.A Iterations
         final int BLK_SIZE = 8;
@@ -38,9 +38,7 @@ public class scrypt {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("SCRYPT");
 
         // Get a 16-byte IV for an AES key if it does not exist.
-            byte[] salt = new byte[16];
-            SecureRandom rand = new SecureRandom();
-            rand.nextBytes(salt);
+            byte[] salt = uname.getBytes();
             // WHATEVER THIS IS, IT NEEDS TO BE STORED AND SENT FOR DECRYPTION (GETTER OR SUM IDC)!!!
         
         // Derive an AES key from the password using the password. The memory

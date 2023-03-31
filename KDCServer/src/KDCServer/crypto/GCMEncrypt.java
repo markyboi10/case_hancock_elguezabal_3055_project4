@@ -36,7 +36,7 @@ public class GCMEncrypt {
         // Generate the session key.
         Key aesKey = aesKeyGen.generateKey();
         //generate the master key from the password.
-        Key mKey = scrypt.genKey(mkey);
+        Key mKey = scrypt.genKey(mkey, uName);
         // Generate the IV.
         SecureRandom rand = new SecureRandom();
         byte[] rawIv = new byte[16];		// Block size of AES.

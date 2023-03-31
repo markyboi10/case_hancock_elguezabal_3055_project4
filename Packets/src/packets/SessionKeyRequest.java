@@ -33,6 +33,15 @@ public class SessionKeyRequest implements Packet, JSONSerializable {
         this.sName = sName;
     }
 
+    public String getuName() {
+        return uName;
+    }
+
+    public String getsName() {
+        return sName;
+    }
+    
+
     /**
      * Converts a JSONObject into a ticket object
      * @param packet byte[] of information representing this packet
