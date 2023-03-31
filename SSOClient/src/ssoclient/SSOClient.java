@@ -43,15 +43,19 @@ public class SSOClient {
         
         // Initializing the CLI
         boolean shortlen = false;
+        
         OptionParser op = new OptionParser(args);
-        LongOption[] ar = new LongOption[3];
-        ar[0] = new LongOption("hosts", true, 'h');
-        ar[1] = new LongOption("user", true, 'u');
-        ar[2] = new LongOption("service", true, 's');
-        op.setLongOpts(ar);
+        op.setLongAndShortOpts(new LongOption[]{
+            new LongOption("hosts", true, 'h'),
+            new LongOption("user", true, 'u'),
+            new LongOption("service", true, 's')
+        });
+       
+        // op.setLongOpts(ar);
         op.setOptString("h:u:s:");
 
-        Tuple<Character, String> opt = op.getLongOpt(false);
+        
+       Tuple<Character, String> opt = op.getLongOpt(false);
         System.out.println(opt.getSecond());
         if (opt == null) {
             System.out.println("usage:\n"
@@ -63,19 +67,19 @@ public class SSOClient {
                     + "   -s, --service The name of the service");
             System.exit(0);
         } else if (Objects.equals(opt.getFirst(), 'h')) {
-            System.out.println("h");
+            config = new Config(opt.getSecond());
         } else if (Objects.equals(opt.getFirst(), 'u')) {
-            System.out.println("u");
             // If the host is not specified then it is the local hosts.json file
-            System.out.println("uu");
+            user = opt.getSecond();
+            config = new Config("hosts.json");
         }
 
         Tuple<Character, String> opt2 = op.getLongOpt(false);
         System.out.println(opt2.getSecond());
         if (Objects.equals(opt2.getFirst(), 'u')) {
-            System.out.println("u");
+            user = opt2.getSecond();
         } else if (Objects.equals(opt2.getFirst(), 's')) {
-            System.out.println("s");
+            service = opt2.getSecond();
             shortlen = true;
         }
 
@@ -84,7 +88,7 @@ public class SSOClient {
             System.out.println(opt3.getSecond());
             if (opt3.getSecond() != null && Objects.equals(opt3.getFirst(), 's')) {
                 // Init the username and service
-                System.out.println("s");
+                service = opt3.getSecond();
             }
         }
         
