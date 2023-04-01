@@ -21,6 +21,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -49,7 +50,9 @@ public class KDCServer {
 
     private static ServerSocket server;
     //private static String nonce;
-    private static byte[] nonceBytes = null;
+    //private static byte[] nonceBytes;
+    
+    //public static byte[] noncc = null;
 
     //private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
@@ -143,6 +146,9 @@ public class KDCServer {
         }
 
     }
+    
+    private static NonceCache nc = new NonceCache(32,30);
+    private static ArrayList<byte[]> nonceList = new ArrayList<>();
 
     /**
      * Waits for a connection with a peer socket, then polls for a message being
@@ -171,10 +177,17 @@ public class KDCServer {
                     CHAPClaim chapClaim_packet = (CHAPClaim) packet;
                     if (secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
 
-                        // Construct the nonce
-                        NonceCache nc = new NonceCache(32, 30);
+//                        // Construct the nonce
+//                        NonceCache nc = new NonceCache(32, 30);
                         byte[] nonceBytes = nc.getNonce();
+                        nonceList.add(nonceBytes);
+//                        System.out.println("original nonce" + Arrays.toString(nonceBytes));
+                        //String s = [61, 49, 70, 95, -15, -97, 30, 49, -2, 33, -61, -14, 17, 32, 87, -68, 5, 114, -54, -118, -70, -83, 30, -41, -66, 83, 87, -61, -114, 68, 63, -17];
                         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
+                        System.out.println("The original nonce, created by the server: " + nonce);
+//noncc = Base64.getDecoder().decode(nonce);
+                        
+                        
 
                         // Create the packet and send
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
@@ -188,19 +201,24 @@ public class KDCServer {
 
                     // Decompile packet
                     String receivedHash = chapResponse_packet.getHash();
+                    
+                    System.out.println("Received combined hash(base64): " + receivedHash);
 
                     // Standard SHA-256
                     MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
                     boolean status = false; //Status of our comparison with recieved hash, this is returned
 
+                    for (byte[] eachNonceByteArr : nonceList) {
                     // For every secret in secrets.json, combine with nonce and hash it. Then check if it equals the recieved hash
                     if (secrets.stream().anyMatch(secret -> {
                         // byte array and combine the two like the client did when they sent their challenge response
                         byte[] secretHashPass = secret.getSecret().getBytes(StandardCharsets.UTF_8);
-                        byte[] clientHashNonce = nonceBytes;
+                        byte[] clientHashNonce = eachNonceByteArr;
+                        //System.out.println("server nonce lookup: " + Arrays.toString(clientHashNonce));
+                        //System.out.println("server hashed passwords: " + Arrays.toString(secretHashPass));
                         byte[] combined = new byte[secretHashPass.length + clientHashNonce.length];
-
+                        
                         System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
                         System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
                         combined = digest.digest(combined);
@@ -208,6 +226,8 @@ public class KDCServer {
                         // Our final hash
                         String serverCombinedHash = Base64.getEncoder().encodeToString(combined);
 
+                        System.out.println("Server checking its combined hash: " + serverCombinedHash);
+                        
                         // Compare the final hash with the received hash
                         return serverCombinedHash.equalsIgnoreCase(receivedHash);
                     })) {
@@ -224,6 +244,7 @@ public class KDCServer {
 
                     }
 
+                }
                 }
                 ;
                 break;
@@ -275,5 +296,5 @@ public class KDCServer {
         return toSend;
 
     }
-
+    
 }
