@@ -13,13 +13,19 @@ import packets.CHAPChallenge;
 import packets.CHAPClaim;
 import packets.CHAPResponse;
 import packets.CHAPStatus;
+import packets.ClientHello;
+import packets.ClientResponse;
+import packets.CommPhase;
 import packets.Packet;
 import packets.PacketType;
 import static packets.PacketType.CHAPChallenge;
 import static packets.PacketType.CHAPResponse;
 import static packets.PacketType.CHAPStatus;
+import static packets.PacketType.ClientResponse;
+import static packets.PacketType.CommPhase;
 import static packets.PacketType.SessionKeyRequest;
 import static packets.PacketType.SessionKeyResponse;
+import packets.ServerHello;
 import packets.SessionKeyRequest;
 import packets.SessionKeyResponse;
 
@@ -101,6 +107,9 @@ public class Communication {
             case CHAPStatus: return new CHAPStatus(line, packetType);
             case CHAPClaim: return new CHAPClaim(line, packetType);
             case ClientHello: return new ClientHello(line, packetType); 
+            case ClientResponse: return new ClientResponse(line, packetType); 
+            case CommPhase: return new CommPhase(line, packetType); 
+            case ServerHello: return new ServerHello(line, packetType); 
             default: return null;
         }    
         
