@@ -27,39 +27,31 @@ import javax.crypto.spec.SecretKeySpec;
  * @author MarkC
  */
 public class GCMDecrypt {
-    
-        
-        public static byte[] decrypt(String ct, String IV, String uName, String mKey, long createTime, long valTime, String sessName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-         //String masterPass = "";
-         
-         
+
+    public static byte[] decrypt(String ct, String IV, String uName, String mKey, long createTime, long valTime, String sessName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
+        //String masterPass = "";
+        System.out.println(mKey + valTime + createTime + uName + IV);
         int tagSize = 128; // 128-bit authentication tag.
         SecretKey key = scrypt.genKey(mKey, uName);
         //byte[] keyBytes = key.getEncoded();
-        
         System.out.println("SCRYPT DECRYPT: " + key);
-        
+
         // Set up an AES cipher object.
-        Cipher aesCipher = null;
-        try {
-            aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException ex) {
-            Logger.getLogger(GCMDecrypt.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
 
         // Setup the key.
         //SecretKeySpec aesKey = new SecretKeySpec(keyBytes, "AES");
-            try {
-                // Put the cipher in encrypt mode with the specified key.
-                aesCipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(tagSize, Base64.getDecoder().decode(IV)));
-                aesCipher.updateAAD(longToBytes(createTime));
-                aesCipher.updateAAD(longToBytes(valTime));
-                aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
-                aesCipher.updateAAD(sessName.getBytes(StandardCharsets.UTF_8));
-            } catch (InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                Logger.getLogger(GCMDecrypt.class.getName()).log(Level.SEVERE, null, ex);
-            }
- 
+        try {
+            // Put the cipher in encrypt mode with the specified key.
+            aesCipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(tagSize, Base64.getDecoder().decode(IV)));
+            aesCipher.updateAAD(longToBytes(createTime));
+            aesCipher.updateAAD(longToBytes(valTime));
+            aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
+            aesCipher.updateAAD(sessName.getBytes(StandardCharsets.UTF_8));
+        } catch (InvalidKeyException | InvalidAlgorithmParameterException ex) {
+            Logger.getLogger(GCMDecrypt.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         // Finalize the message.
         byte[] plaintext = null;
         try {
@@ -71,7 +63,8 @@ public class GCMDecrypt {
         return plaintext;
 
     } // End 'decrypt' method
-        private static byte[] longToBytes(long x) {
+
+    private static byte[] longToBytes(long x) {
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(x);
         return buffer.array();
