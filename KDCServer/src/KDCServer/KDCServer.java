@@ -2,7 +2,7 @@ package KDCServer;
 
 /**
  *
- * @author Mark Case, William Hancock
+ * @author Mark Case, William Hancock, Alexander Elguezabal
  */
 import KDCServer.config.Config;
 import KDCServer.config.Secrets;
@@ -14,14 +14,12 @@ import java.net.Socket;
 import java.net.ServerSocket;
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -49,12 +47,7 @@ public class KDCServer {
     private static Config config;
 
     private static ServerSocket server;
-    //private static String nonce;
-    //private static byte[] nonceBytes;
     
-    //public static byte[] noncc = null;
-
-    //private static File secretsFile = new File("C:\\Users\\willi\\Documents\\NetBeansProjects\\case_hancock_elguezabal_3055_project4\\kdc-config\\secrets.json");
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
 
         OptionParser op = new OptionParser(args);
@@ -88,51 +81,10 @@ public class KDCServer {
 
             // Accept packets & communicate
             poll();
+            
+            // Close the socket when polling is completed or an error is thrown.
+            server.close();
 
-//            NonceCache nc = new NonceCache(32, 30);
-//            byte[] nonceBytes = nc.getNonce();
-//            nonce = Base64.getEncoder().encodeToString(nonceBytes);
-            // Loop forever handing connections.
-            /**
-             * while (true) {
-             *
-             *
-             * /**
-             * // Random nonce NonceCache nc = new NonceCache(32, 30); byte[]
-             * nonceBytes = nc.getNonce(); String nonce =
-             * Base64.getEncoder().encodeToString(nonceBytes);
-             *
-             * // Get the username line from the client. String line =
-             * recv.nextLine();
-             *
-             * // Check if user exists and demand password + send nonce if
-             * correct, // error otherwise
-             *
-             * for (JsonNode secretNode : JSONSecrets()) { String userName =
-             * secretNode.get("user").asText(); // Check if the current user is
-             * the one you're looking for if (userName.equals(line)) { String
-             * password = secretNode.get("secret").asText(); //
-             * send.println("Enter your password below. Yout nonce is: " +
-             * nonce); send.println(password + " your nonce is: " + nonce);
-             * //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
-             * // Get hashed pass and nonce from client, compare and validate to
-             * kdc version String line2 = recv.nextLine();
-             * send.println("Checking hash . . ."); MessageDigest digest =
-             * MessageDigest.getInstance("SHA-256"); byte[] hashPass =
-             * password.getBytes(StandardCharsets.UTF_8); byte[] hashNonce =
-             * nonce.getBytes(StandardCharsets.UTF_8); byte[] combined = new
-             * byte[hashPass.length + hashNonce.length];
-             * System.arraycopy(hashPass, 0, combined, 0, hashPass.length);
-             * System.arraycopy(hashNonce, 0, combined, hashPass.length,
-             * hashNonce.length); combined = digest.digest(combined); if
-             * (line2.equals(Arrays.toString(combined))) { send.println("You
-             * have been authenticated"); sendSessionKey("", "", password); }
-             * else { send.println("You have denied"); } break; } else {
-             * send.println("User Error, name not found"); System.exit(0); } }
-             *
-             * // Close the connection.
-            }*
-             */
         } catch (IOException ioe) {
             ioe.printStackTrace();
             server.close();
@@ -147,11 +99,10 @@ public class KDCServer {
 
     }
     
+    // Gobal noncecache, holding nonces.
     private static NonceCache nc = new NonceCache(32,30);
     private static ArrayList<byte[]> nonceList = new ArrayList<>();
 
-    // Gobal noncecache, holding nonces.
-    private static NonceCache nc = new NonceCache(32, 30);
     
     /**
      * Waits for a connection with a peer socket, then polls for a message being
@@ -195,9 +146,8 @@ public class KDCServer {
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
                     }
-                }
-                ;
-                break;
+                }; break;
+                
                 case CHAPResponse: {
                     CHAPResponse chapResponse_packet = (CHAPResponse) packet; // User's response to challenge, contains combined, hashed pass & nonce
 
@@ -211,45 +161,44 @@ public class KDCServer {
 
                     boolean status = false; //Status of our comparison with recieved hash, this is returned
 
+                    // Loop over each secretHashPass||clientHashNonce possibility, and determine if the hash exists in the KDC
                     for (byte[] eachNonceByteArr : nonceList) {
-                    // For every secret in secrets.json, combine with nonce and hash it. Then check if it equals the recieved hash
-                    if (secrets.stream().anyMatch(secret -> {
-                        // byte array and combine the two like the client did when they sent their challenge response
-                        byte[] secretHashPass = secret.getSecret().getBytes(StandardCharsets.UTF_8);
-                        byte[] clientHashNonce = eachNonceByteArr;
-                        //System.out.println("server nonce lookup: " + Arrays.toString(clientHashNonce));
-                        //System.out.println("server hashed passwords: " + Arrays.toString(secretHashPass));
-                        byte[] combined = new byte[secretHashPass.length + clientHashNonce.length];
-                        
-                        System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
-                        System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
-                        combined = digest.digest(combined);
+                        // For every secret in secrets.json, combine with nonce and hash it. Then check if it equals the recieved hash
+                        if (secrets.stream().anyMatch(secret -> {
+                            // byte array and combine the two like the client did when they sent their challenge response
+                            byte[] secretHashPass = Base64.getDecoder().decode(secret.getSecret());
+                            byte[] clientHashNonce = eachNonceByteArr;
+                            //System.out.println("server nonce lookup: " + Arrays.toString(clientHashNonce));
+                            //System.out.println("server hashed passwords: " + Arrays.toString(secretHashPass));
+                            byte[] combined = new byte[secretHashPass.length + clientHashNonce.length];
 
-                        // Our final hash
-                        String serverCombinedHash = Base64.getEncoder().encodeToString(combined);
+                            System.arraycopy(secretHashPass, 0, combined, 0, secretHashPass.length);
+                            System.arraycopy(clientHashNonce, 0, combined, secretHashPass.length, clientHashNonce.length);
+                            combined = digest.digest(combined);
 
-                        System.out.println("Server checking its combined hash: " + serverCombinedHash);
-                        
-                        // Compare the final hash with the received hash
-                        return serverCombinedHash.equalsIgnoreCase(receivedHash);
-                    })) {
-                        // If valid password, boolean is true 
-                        status = true;
-                        // Create the packet and send
-                        CHAPStatus chapStatus_packet = new CHAPStatus(status);
-                        Communication.send(peer, chapStatus_packet);
-                    } else {
-                        // If invalid password, boolean remains false
-                        // Create the packet and send
-                        CHAPStatus chapStatus_packet = new CHAPStatus(status);
-                        Communication.send(peer, chapStatus_packet);
+                            // Our final hash
+                            String serverCombinedHash = Base64.getEncoder().encodeToString(combined);
 
+                            System.out.println("Server checking its combined hash: " + serverCombinedHash);
+
+                            // Compare the final hash with the received hash
+                            return serverCombinedHash.equalsIgnoreCase(receivedHash);
+                        })) {
+                            // If valid password, boolean is true 
+                            status = true;
+                            // Create the packet and send
+                            CHAPStatus chapStatus_packet = new CHAPStatus(status);
+                            Communication.send(peer, chapStatus_packet);
+                        } else {
+                            // If invalid password, boolean remains false
+                            // Create the packet and send
+                            CHAPStatus chapStatus_packet = new CHAPStatus(status);
+                            Communication.send(peer, chapStatus_packet);
+
+                        }
                     }
-
-                }
-                }
-                ;
-                break;
+                }; break;
+                
                 case SessionKeyRequest: {
                     //String pw2 = "";
                     SessionKeyRequest SessionKeyRequest_packet = (SessionKeyRequest) packet; //Receive packet containing username and service name
@@ -271,14 +220,9 @@ public class KDCServer {
                                     Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             });
-                }
-                ;
-                break;
-
+                }; break;
             }
-            
-            // Close the connection
-            // server.close();
+           
         }
     }
 

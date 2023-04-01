@@ -146,11 +146,11 @@ public class SSOClient {
         //https://stackoverflow.com/questions/12076165/how-to-obscure-scanner-input-text
         //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
         Console console = System.console();
-        String pw = new String(console.readPassword("KDC Password: "));
+        final String pw = new String(console.readPassword("KDC Password: "));
         //Concatenate Password+Nonce and hash
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] clientHashPass = pw.getBytes(StandardCharsets.UTF_8);
-        byte[] clientHashNonce = chapChallenge_Packet.getNonce().getBytes(StandardCharsets.UTF_8);
+        byte[] clientHashPass = Base64.getDecoder().decode(pw);
+        byte[] clientHashNonce = Base64.getDecoder().decode(chapChallenge_Packet.getNonce());
         System.out.println("The received nonce displayed client side: " + chapChallenge_Packet.getNonce());
 //        byte[] clientHashNonce = KDCServer.getNocc();
         //System.out.println("Client recieved hashed nonce: " + Arrays.toString(clientHashNonce));
