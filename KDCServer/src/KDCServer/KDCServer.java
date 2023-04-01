@@ -231,7 +231,7 @@ public class KDCServer {
         //validity period comes from config file  
         
         try {
-            long ctime = System.currentTimeMillis();
+            final long ctime = System.currentTimeMillis();
             Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName);
             SessionKeyResponse toSend = new SessionKeyResponse(ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(keyiv.getSecond()), Base64.getEncoder().encodeToString(keyiv.getFirst()));
             //now we send!
