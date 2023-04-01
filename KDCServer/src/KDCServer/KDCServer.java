@@ -74,8 +74,6 @@ public class KDCServer {
         }
 
         try {
-            System.out.println(config.getPort());
-            System.out.println("Amount of Secrets " + secrets.size());
             // Initializie the server with the config port
             server = new ServerSocket(config.getPort());
 

@@ -1,5 +1,6 @@
 package echoservice;
 
+import communication.Communication;
 import echoservice.config.Config;
 import java.io.FileNotFoundException;
 import java.net.Socket;
@@ -8,14 +9,20 @@ import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
+import packets.Packet;
 
 public class EchoService {
     
     private static Config config;  
+    
+    private static ServerSocket server;
 
     public static void main(String[] args) throws FileNotFoundException, InvalidObjectException {
         OptionParser op = new OptionParser(args);
@@ -38,34 +45,51 @@ public class EchoService {
             config = new Config(opt.getSecond()); //load config
         }
         try {
-            ServerSocket server = new ServerSocket(config.getPort());
+            // Create the server
+            server = new ServerSocket(config.getPort());
 
-            // Loop forever handing connections.
-            while (true) {
-                // Wait for a connection.
-                Socket sock = server.accept();
-
-                System.out.println("Connection received.");
-
-                //begin the handshake
-                
-                // Setup the streams for use.
-                Scanner recv = new Scanner(sock.getInputStream());
-                PrintWriter send = new PrintWriter(sock.getOutputStream(), true);
-
-                // Get the line from the client.
-                String line = recv.nextLine();
-                System.out.println("Client said: " + line);
-
-                // Echo the line back.
-                send.println(line);
-
-                // Close the connection.
-                sock.close();
-            }
+            // Poll for input
+            poll();
+            
+            // Close the server when completed or error is thrown.
+            server.close();
         } catch (IOException ioe) {
             ioe.printStackTrace();
+        } catch (NoSuchMethodException ex) {
+            System.out.println("EchoService No Such Method Exception");
+            Logger.getLogger(EchoService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchAlgorithmException ex) {
+            System.out.println("EchoService No Such Algorithm Exception");
+            Logger.getLogger(EchoService.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    /**
+     * Waits for a connection with a peer socket, then polls for a message being
+     * sent. Each iteration of the loop operates for one message, as not to
+     * block multi-peer communication.
+     *
+     * @throws IOException
+     */
+    private static void poll() throws IOException, NoSuchMethodException, NoSuchAlgorithmException {
+        while (true) { // Consistently accept connections
+
+            // Establish the connection & read the message
+            Socket peer = server.accept();
+
+            // Determine the packet type.
+            System.out.println("Waiting for a packet...");
+            final Packet packet = Communication.read(peer);
+            
+            System.out.println("Packet Recieved: ["+packet.getType().name()+"]");
+            
+            // Switch statement only goes over packets expected by the KDC, any other packet will be ignored.
+            switch (packet.getType()) {
+
+                
+            } 
+        }
+
     }
 
 }
