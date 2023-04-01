@@ -26,6 +26,7 @@ import packets.SessionKeyResponse;
 import ssoclient.config.Config;
 import ssoclient.config.Host;
 
+
 public class SSOClient {
    
     public static ArrayList<Host> hosts = new ArrayList<>();
@@ -150,6 +151,10 @@ public class SSOClient {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] clientHashPass = pw.getBytes(StandardCharsets.UTF_8);
         byte[] clientHashNonce = chapChallenge_Packet.getNonce().getBytes(StandardCharsets.UTF_8);
+        System.out.println("The received nonce displayed client side: " + chapChallenge_Packet.getNonce());
+//        byte[] clientHashNonce = KDCServer.getNocc();
+        //System.out.println("Client recieved hashed nonce: " + Arrays.toString(clientHashNonce));
+        //System.out.println("Client original hashed pass: " + Arrays.toString(clientHashPass));
         byte[] combined = new byte[clientHashPass.length + clientHashNonce.length];
         System.arraycopy(clientHashPass, 0, combined, 0, clientHashPass.length);
         System.arraycopy(clientHashNonce, 0, combined, clientHashPass.length, clientHashNonce.length);
