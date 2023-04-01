@@ -150,6 +150,9 @@ public class KDCServer {
     private static NonceCache nc = new NonceCache(32,30);
     private static ArrayList<byte[]> nonceList = new ArrayList<>();
 
+    // Gobal noncecache, holding nonces.
+    private static NonceCache nc = new NonceCache(32, 30);
+    
     /**
      * Waits for a connection with a peer socket, then polls for a message being
      * sent. Each iteration of the loop operates for one message, as not to
@@ -177,15 +180,14 @@ public class KDCServer {
                     CHAPClaim chapClaim_packet = (CHAPClaim) packet;
                     if (secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
 
-//                        // Construct the nonce
-//                        NonceCache nc = new NonceCache(32, 30);
+
+                        // Construct the nonce
                         byte[] nonceBytes = nc.getNonce();
                         nonceList.add(nonceBytes);
-//                        System.out.println("original nonce" + Arrays.toString(nonceBytes));
+                        // System.out.println("original nonce" + Arrays.toString(nonceBytes));
                         //String s = [61, 49, 70, 95, -15, -97, 30, 49, -2, 33, -61, -14, 17, 32, 87, -68, 5, 114, -54, -118, -70, -83, 30, -41, -66, 83, 87, -61, -114, 68, 63, -17];
                         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
                         System.out.println("The original nonce, created by the server: " + nonce);
-//noncc = Base64.getDecoder().decode(nonce);
                         
                         
 
