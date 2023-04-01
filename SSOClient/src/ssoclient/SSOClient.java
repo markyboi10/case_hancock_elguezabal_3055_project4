@@ -196,7 +196,7 @@ public class SSOClient {
         System.out.println(sessKeyResp_Packet.getCreateTime());
         System.out.println(sessKeyResp_Packet.getsName());
         
-        GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKey(), sessKeyResp_Packet.getIv(), user, pw, sessKeyResp_Packet.getValidityTime(),sessKeyResp_Packet.getCreateTime(),sessKeyResp_Packet.getsName()  );
+        GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKey(), sessKeyResp_Packet.getIv(), user, pw, sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getsName());
         
         return true;
     }
