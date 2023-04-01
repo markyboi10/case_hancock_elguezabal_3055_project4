@@ -229,17 +229,18 @@ public class KDCServer {
     //this is the part where session key is sent to client 
     private static SessionKeyResponse sendSessionKey(String uname, String sName, String pw) {
         //validity period comes from config file  
-        SessionKeyResponse toSend = new SessionKeyResponse(System.currentTimeMillis(), 0, uname, sName);
+        
         try {
-            Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, toSend.getValidityTime(), toSend.getCreateTime(), uname, sName);
-            toSend.seteSKey(keyiv.getFirst());
-            toSend.setIv(keyiv.getSecond());
+            long ctime = System.currentTimeMillis();
+            Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName);
+            SessionKeyResponse toSend = new SessionKeyResponse(ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(keyiv.getSecond()), Base64.getEncoder().encodeToString(keyiv.getSecond()));
             //now we send!
+            return toSend;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
             Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return toSend;
+        return null;
 
     }
     
