@@ -33,11 +33,14 @@ public class GCMEncrypt {
 
         // Set the key size to 128 bits.
         aesKeyGen.init(128);
+        
+        System.out.println("MKEY: " + mkey);
 
         // Generate the session key.
         SecretKey aesKey = aesKeyGen.generateKey();
         //generate the master key from the password.
         SecretKey mKey = scrypt.genKey(mkey, uName);
+        System.out.println("SCRYPT ENCRYPT: " + mKey);
         // Generate the IV.
         SecureRandom rand = new SecureRandom();
         byte[] rawIv = new byte[16];		// Block size of AES.

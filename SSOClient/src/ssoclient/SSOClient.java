@@ -1,5 +1,6 @@
 package ssoclient;
 
+import ClientServerCrypto.GCMDecrypt;
 import communication.Communication;
 import java.io.Console;
 import java.io.FileNotFoundException;
@@ -9,6 +10,7 @@ import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -31,12 +33,13 @@ public class SSOClient {
    
     public static ArrayList<Host> hosts = new ArrayList<>();
     private static Config config;
+    private static String pw; 
    
     // Command line variables
     private static String user;
     private static String service;
     
-    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException {
 
         System.out.println("args: " + Arrays.toString(args));
         
@@ -146,7 +149,7 @@ public class SSOClient {
         //https://stackoverflow.com/questions/12076165/how-to-obscure-scanner-input-text
         //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
         Console console = System.console();
-        final String pw = new String(console.readPassword("KDC Password: "));
+        pw = new String(console.readPassword("KDC Password: "));
         //Concatenate Password+Nonce and hash
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] clientHashPass = Base64.getDecoder().decode(pw);
@@ -175,7 +178,7 @@ public class SSOClient {
         return true; // completed CHAP
     }   
     
-    private static boolean SessionKeyRequest() throws IOException, NoSuchMethodException {
+    private static boolean SessionKeyRequest() throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException {
         Host host = getHost("kdcd");
         
         // MESSAGE 1: Client sends kdc username and service name
@@ -189,7 +192,11 @@ public class SSOClient {
         
         System.out.println("Session key");
         System.out.println(sessKeyResp_Packet.geteSKey());
+        System.out.println(sessKeyResp_Packet.getValidityTime());
+        System.out.println(sessKeyResp_Packet.getCreateTime());
+        System.out.println(sessKeyResp_Packet.getsName());
         
+        GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKey(), sessKeyResp_Packet.getIv(), user, pw, sessKeyResp_Packet.getValidityTime(),sessKeyResp_Packet.getCreateTime(),sessKeyResp_Packet.getsName()  );
         
         return true;
     }

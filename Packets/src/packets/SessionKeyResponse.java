@@ -82,6 +82,11 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     public String geteSKey() {
         return eSKey;
     }
+
+    public String getsName() {
+        return sName;
+    }
+    
     
     /**
      * Converts a JSONObject into a ticket object
