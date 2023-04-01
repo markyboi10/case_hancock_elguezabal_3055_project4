@@ -130,12 +130,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
               this.sName = tmp.getString("sName");
             else
               throw new InvalidObjectException("Expected an Ticket object -- sName expected.");
-            
-            if (tmp.containsKey("iv"))
-              this.iv = tmp.getString("iv");
-            else 
-              throw new InvalidObjectException("Expected an Ticket object -- iv (byte[] array) expected.");
-            
+ 
             if (tmp.containsKey("iv"))
               this.iv = tmp.getString("iv");
             else 
