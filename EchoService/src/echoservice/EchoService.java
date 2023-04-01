@@ -47,6 +47,8 @@ public class EchoService {
 
                 System.out.println("Connection received.");
 
+                //begin the handshake
+                
                 // Setup the streams for use.
                 Scanner recv = new Scanner(sock.getInputStream());
                 PrintWriter send = new PrintWriter(sock.getOutputStream(), true);
