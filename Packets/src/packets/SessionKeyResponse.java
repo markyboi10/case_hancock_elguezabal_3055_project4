@@ -74,6 +74,14 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     public long getValidityTime() {
         return validityTime;
     }
+
+    public String getIv() {
+        return iv;
+    }
+
+    public String geteSKey() {
+        return eSKey;
+    }
     
     /**
      * Converts a JSONObject into a ticket object
@@ -137,7 +145,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
               throw new InvalidObjectException("Expected an Ticket object -- iv (String) expected.");
             
             if (tmp.containsKey("eSKey"))
-              this.iv = tmp.getString("eSKey");
+              this.eSKey = tmp.getString("eSKey");
             else 
               throw new InvalidObjectException("Expected an Ticket object -- eSKey (String) expected.");
           }

@@ -184,8 +184,11 @@ public class SSOClient {
         
          // MESSAGE 2
         SessionKeyResponse sessKeyResp_Packet = (SessionKeyResponse) Communication.read(socket); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
+        System.out.println("IV");
+        System.out.println(sessKeyResp_Packet.getIv());
         
-        
+        System.out.println("Session key");
+        System.out.println(sessKeyResp_Packet.geteSKey());
         
         
         return true;
