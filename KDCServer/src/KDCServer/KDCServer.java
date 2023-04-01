@@ -182,6 +182,7 @@ public class KDCServer {
                             System.out.println("Server checking its combined hash: " + serverCombinedHash);
 
                             // Compare the final hash with the received hash
+                            System.out.println(serverCombinedHash.equalsIgnoreCase(receivedHash));
                             return serverCombinedHash.equalsIgnoreCase(receivedHash);
                         })) {
                             // If valid password, boolean is true 
@@ -198,32 +199,31 @@ public class KDCServer {
                         }
                     }
                 }; break;
-                
+
                 case SessionKeyRequest: {
                     //String pw2 = "";
                     SessionKeyRequest SessionKeyRequest_packet = (SessionKeyRequest) packet; //Receive packet containing username and service name
-                    // https://stackoverflow.com/questions/31789279/how-can-one-find-an-item-after-the-match-using-streams
-                    secrets.stream() // create stream of secret objects in coll.
-                            .filter(n -> n.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getuName())) //If secret.username == packet.username equals
-                            .findFirst() // first secreet obj that matches if statement 
-                            .ifPresent(n -> {
-                                System.out.println("Secret pw associated with user: " + n.getUser());
-                                String pw = n.getSecret(); // get secret associated to the username 
-                                String user = n.getUser();
-                                String sessionName = SessionKeyRequest_packet.getsName();
-                                //sendSessionKey(user, sessionName, pw);
+                    String sessionName = "";
+                    String user = "";
+                    String pw = "";
+                    for (Secrets secret : secrets) {
+                        if (secret.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getuName())) {
+                            System.out.println("Secret pw associated with user: " + secret.getUser());
+                            pw = secret.getSecret();
+                            user = secret.getUser();
+                            sessionName = SessionKeyRequest_packet.getsName();
+                            //sendSessionKey(user, sessionName, pw);
+                            break;
+                        }
+                    }
 
-                                try {
-                                    //SessionKeyResponse chapStatus_packet = new SessionKeyResponse(sendSessionKey(user, sessionName, pw));
-                                    Communication.send(peer, sendSessionKey(user, sessionName, pw));
-                                } catch (IOException ex) {
-                                    Logger.getLogger(KDCServer.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            });
-                }; break;
-            }
-           
+                    //SessionKeyResponse chapStatus_packet = new SessionKeyResponse(sendSessionKey(user, sessionName, pw));
+                    Communication.send(peer, sendSessionKey(user, sessionName, pw));
+                };break;
+
+            } 
         }
+
     }
 
     //this is the part where session key is sent to client 

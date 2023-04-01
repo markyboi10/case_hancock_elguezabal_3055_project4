@@ -15,6 +15,7 @@ import java.util.Base64;
 import java.security.InvalidAlgorithmParameterException;
 import java.nio.charset.StandardCharsets;
 import java.security.spec.InvalidKeySpecException;
+import javax.crypto.SecretKey;
 import merrimackutil.util.Tuple;
 
 public class GCMEncrypt {
@@ -34,9 +35,9 @@ public class GCMEncrypt {
         aesKeyGen.init(128);
 
         // Generate the session key.
-        Key aesKey = aesKeyGen.generateKey();
+        SecretKey aesKey = aesKeyGen.generateKey();
         //generate the master key from the password.
-        Key mKey = scrypt.genKey(mkey, uName);
+        SecretKey mKey = scrypt.genKey(mkey, uName);
         // Generate the IV.
         SecureRandom rand = new SecureRandom();
         byte[] rawIv = new byte[16];		// Block size of AES.

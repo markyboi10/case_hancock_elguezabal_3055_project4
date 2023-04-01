@@ -20,6 +20,7 @@ public class scrypt {
 /**
      * Derives the AES-128 key from the password.
      * @param password the password to derive the key from
+     * @param uname
      * @return the AES-128 key
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeySpecException
@@ -38,7 +39,7 @@ public class scrypt {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("SCRYPT");
 
         // Get a 16-byte IV for an AES key if it does not exist.
-            byte[] salt = uname.getBytes();
+            byte[] salt = Base64.getDecoder().decode(uname);
             // WHATEVER THIS IS, IT NEEDS TO BE STORED AND SENT FOR DECRYPTION (GETTER OR SUM IDC)!!!
         
         // Derive an AES key from the password using the password. The memory
