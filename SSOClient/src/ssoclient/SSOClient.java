@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
+import javax.crypto.NoSuchPaddingException;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.Tuple;
@@ -39,7 +40,7 @@ public class SSOClient {
     private static String user;
     private static String service;
     
-    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException, NoSuchPaddingException {
 
         System.out.println("args: " + Arrays.toString(args));
         
@@ -178,7 +179,7 @@ public class SSOClient {
         return true; // completed CHAP
     }   
     
-    private static boolean SessionKeyRequest() throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static boolean SessionKeyRequest() throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
         Host host = getHost("kdcd");
         
         // MESSAGE 1: Client sends kdc username and service name
