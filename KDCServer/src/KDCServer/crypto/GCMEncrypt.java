@@ -24,6 +24,7 @@ public class GCMEncrypt {
             NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException,
             BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+        
         int tagSize = 128;
         // Set up an AES cipher object.
         Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -45,6 +46,7 @@ public class GCMEncrypt {
         SecureRandom rand = new SecureRandom();
         byte[] rawIv = new byte[16];		// Block size of AES.
         rand.nextBytes(rawIv);					// Fill the array with random bytes.
+        System.out.println(mkey+valTime+createTime+uName+Base64.getEncoder().encodeToString(rawIv));
         GCMParameterSpec gcmParams = new GCMParameterSpec(tagSize, rawIv);
 
         // Put the cipher in encrypt mode with the specified key.
