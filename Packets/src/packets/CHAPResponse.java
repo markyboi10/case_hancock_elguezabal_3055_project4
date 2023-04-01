@@ -16,6 +16,9 @@ import merrimackutil.json.types.JSONType;
  */
 public class CHAPResponse implements Packet, JSONSerializable {
         
+    // Packet Type
+    private static final PacketType PACKET_TYPE = PacketType.CHAPResponse;
+    
     // Packet Data
     private String hash;
 
@@ -82,7 +85,7 @@ public class CHAPResponse implements Packet, JSONSerializable {
     @Override
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
-        object.put("packetType", PacketType.getPacketFromClass(this.getClass()).toString());
+        object.put("packetType", PACKET_TYPE.toString());
         object.put("hash", this.hash);
 
         return object;
@@ -126,6 +129,6 @@ public class CHAPResponse implements Packet, JSONSerializable {
      */
     @Override
     public PacketType getType() {
-        return PacketType.getPacketFromClass(this.getClass());
+        return PACKET_TYPE;
     }
 }

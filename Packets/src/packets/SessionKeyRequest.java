@@ -16,6 +16,9 @@ import merrimackutil.json.types.JSONType;
  */
 public class SessionKeyRequest implements Packet, JSONSerializable {
         
+    // Packet Type
+    private static final PacketType PACKET_TYPE = PacketType.SessionKeyRequest;
+    
     // Packet Data
     private String uName;
     private String sName;
@@ -97,7 +100,7 @@ public class SessionKeyRequest implements Packet, JSONSerializable {
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
         
-        object.put("packetType", PacketType.getPacketFromClass(this.getClass()).toString());
+        object.put("packetType", PACKET_TYPE.toString());
         object.put("uName", this.uName);
         object.put("sName", this.sName);
 
@@ -143,6 +146,6 @@ public class SessionKeyRequest implements Packet, JSONSerializable {
      */
     @Override
     public PacketType getType() {
-        return PacketType.getPacketFromClass(this.getClass());
+        return PACKET_TYPE;
     }
 }

@@ -16,6 +16,9 @@ import merrimackutil.json.types.JSONType;
  */
 public class CHAPClaim implements Packet, JSONSerializable {
         
+    // Packet Type
+    private static final PacketType PACKET_TYPE = PacketType.CHAPClaim;
+    
     // Packet Data
     private String uName;
 
@@ -82,7 +85,7 @@ public class CHAPClaim implements Packet, JSONSerializable {
     @Override
     public JSONType toJSONType() {
         JSONObject object = new JSONObject();
-        object.put("packetType", PacketType.getPacketFromClass(this.getClass()).toString());
+        object.put("packetType", PACKET_TYPE.toString());
         object.put("uName", this.uName);
 
         return object;
@@ -127,7 +130,7 @@ public class CHAPClaim implements Packet, JSONSerializable {
      */
     @Override
     public PacketType getType() {
-        return PacketType.getPacketFromClass(this.getClass());
+        return PACKET_TYPE;
     }
     
 }
