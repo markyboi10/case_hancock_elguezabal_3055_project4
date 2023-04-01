@@ -233,7 +233,7 @@ public class KDCServer {
         try {
             long ctime = System.currentTimeMillis();
             Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName);
-            SessionKeyResponse toSend = new SessionKeyResponse(ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(keyiv.getSecond()), Base64.getEncoder().encodeToString(keyiv.getSecond()));
+            SessionKeyResponse toSend = new SessionKeyResponse(ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(keyiv.getSecond()), Base64.getEncoder().encodeToString(keyiv.getFirst()));
             //now we send!
             return toSend;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
