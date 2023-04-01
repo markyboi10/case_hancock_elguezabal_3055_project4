@@ -18,7 +18,7 @@ import merrimackutil.json.types.JSONType;
 public class ClientHello implements Packet, JSONSerializable {
         
     // Packet Type
-    private static final PacketType PACKET_TYPE = PacketType.CHAPChallenge;
+    private static final PacketType PACKET_TYPE = PacketType.ClientHello;
     
     // Packet Data
     private String nonce;

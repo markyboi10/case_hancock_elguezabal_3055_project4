@@ -14,7 +14,11 @@ public enum PacketType {
       CHAPChallenge(packets.CHAPChallenge.class),
       CHAPResponse(packets.CHAPResponse.class),
       CHAPStatus(packets.CHAPStatus.class),
-      CHAPClaim(packets.CHAPClaim.class) 
+      CHAPClaim(packets.CHAPClaim.class), 
+      ClientHello(packets.ClientHello.class),
+      ClientResponse(packets.ClientResponse.class),
+      CommPhase(packets.CommPhase.class),
+      ServerHello(packets.ServerHello.class)
       ;
 
       

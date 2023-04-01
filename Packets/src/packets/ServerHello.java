@@ -17,7 +17,7 @@ import merrimackutil.json.types.JSONType;
 public class ServerHello implements Packet, JSONSerializable {
 
     // Packet Type
-    private static final PacketType PACKET_TYPE = PacketType.SessionKeyResponse;
+    private static final PacketType PACKET_TYPE = PacketType.ServerHello;
 
     // Packet Data
     private String nonce;

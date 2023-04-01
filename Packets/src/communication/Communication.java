@@ -100,6 +100,7 @@ public class Communication {
             case CHAPResponse: return new CHAPResponse(line, packetType);
             case CHAPStatus: return new CHAPStatus(line, packetType);
             case CHAPClaim: return new CHAPClaim(line, packetType);
+            case ClientHello: return new ClientHello(line, packetType); 
             default: return null;
         }    
         

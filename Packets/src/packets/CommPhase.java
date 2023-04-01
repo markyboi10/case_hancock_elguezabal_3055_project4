@@ -15,7 +15,7 @@ import merrimackutil.json.types.JSONType;
 public class CommPhase implements Packet, JSONSerializable {
 
     // Packet Type
-    private static final PacketType PACKET_TYPE = PacketType.SessionKeyResponse;
+    private static final PacketType PACKET_TYPE = PacketType.CommPhase;
 
     // Packet Data
     private String nonce;
