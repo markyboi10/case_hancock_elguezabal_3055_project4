@@ -24,8 +24,8 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     private long validityTime;
     private String uName;
     private String sName;
-    private byte[] iv;
-    private byte[] eSKey;
+    private String iv;
+    private String eSKey;
 
     /**
      * Default Constructor for a SessionKeyResponse
@@ -36,7 +36,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
      * @param iv
      * @param eSKey 
      */
-    public SessionKeyResponse(long createTime, long validityTime, String uName, String sName, byte[] iv, byte[] eSKey) {
+    public SessionKeyResponse(long createTime, long validityTime, String uName, String sName, String iv, String eSKey) {
         this.createTime = System.currentTimeMillis();
         this.validityTime = validityTime;
         this.uName = uName;
@@ -59,11 +59,11 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
         this.sName = sName;
     }
 
-    public void setIv(byte[] iv) {
+    public void setIv(String iv) {
         this.iv = iv;
     }
 
-    public void seteSKey(byte[] eSKey) {
+    public void seteSKey(String eSKey) {
         this.eSKey = eSKey;
     }
 
@@ -132,17 +132,17 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
               throw new InvalidObjectException("Expected an Ticket object -- sName expected.");
             
             if (tmp.containsKey("iv"))
-              this.iv = Base64.getDecoder().decode(tmp.getString("iv"));
+              this.iv = tmp.getString("iv");
             else 
               throw new InvalidObjectException("Expected an Ticket object -- iv (byte[] array) expected.");
             
             if (tmp.containsKey("iv"))
-              this.iv = Base64.getDecoder().decode(tmp.getString("iv"));
+              this.iv = tmp.getString("iv");
             else 
               throw new InvalidObjectException("Expected an Ticket object -- iv (String) expected.");
             
             if (tmp.containsKey("eSKey"))
-              this.iv = Base64.getDecoder().decode(tmp.getString("eSKey"));
+              this.iv = tmp.getString("eSKey");
             else 
               throw new InvalidObjectException("Expected an Ticket object -- eSKey (String) expected.");
           }
@@ -163,8 +163,8 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
         object.put("validityTime", ""+this.validityTime);
         object.put("uName", this.uName);
         object.put("sName", this.sName);
-        object.put("iv", Base64.getEncoder().encode(this.iv));
-        object.put("eSKey", Base64.getEncoder().encode(this.eSKey));
+        object.put("iv", this.iv);
+        object.put("eSKey", this.eSKey);
 
         return object;
     }
