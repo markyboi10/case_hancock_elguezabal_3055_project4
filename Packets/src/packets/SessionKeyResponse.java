@@ -37,7 +37,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
      * @param eSKey 
      */
     public SessionKeyResponse(long createTime, long validityTime, String uName, String sName, String iv, String eSKey) {
-        this.createTime = System.currentTimeMillis();
+        this.createTime = createTime;
         this.validityTime = validityTime;
         this.uName = uName;
         this.sName = sName;
@@ -53,7 +53,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
      * @param sName 
      */
     public SessionKeyResponse(long createTime, long validityTime, String uName, String sName) {
-        this.createTime = System.currentTimeMillis();
+        this.createTime = createTime;
         this.validityTime = validityTime;
         this.uName = uName;
         this.sName = sName;
