@@ -2,6 +2,7 @@
 package KDCServer.crypto;
 
 import KDCServer.KDCServer;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -40,7 +41,7 @@ public class scrypt {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("SCRYPT");
 
         // Get a 16-byte IV for an AES key if it does not exist.
-            byte[] salt = Base64.getDecoder().decode(uname);
+            byte[] salt = uname.getBytes(StandardCharsets.UTF_8);
             // WHATEVER THIS IS, IT NEEDS TO BE STORED AND SENT FOR DECRYPTION (GETTER OR SUM IDC)!!!
         
         // Derive an AES key from the password using the password. The memory
