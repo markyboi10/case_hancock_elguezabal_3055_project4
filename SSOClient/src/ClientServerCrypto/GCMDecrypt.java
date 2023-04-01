@@ -59,7 +59,6 @@ public class GCMDecrypt {
         } catch (IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(GCMDecrypt.class.getName()).log(Level.SEVERE, null, ex);
         }
-
         return plaintext;
 
     } // End 'decrypt' method
