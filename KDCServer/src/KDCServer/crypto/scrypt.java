@@ -9,6 +9,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jcajce.spec.ScryptKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -50,8 +51,9 @@ public class scrypt {
                 PARALLELIZATION, KEY_SIZE);
         
         // Generate the secrete key.
-        SecretKey key = factory.generateSecret(
+        SecretKey tmp = factory.generateSecret(
                 scryptSpec);
+        SecretKey key = new SecretKeySpec(tmp.getEncoded(), "AES");
         return key;
     }
 }
