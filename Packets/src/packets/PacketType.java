@@ -18,7 +18,8 @@ public enum PacketType {
       ClientHello(packets.ClientHello.class),
       ClientResponse(packets.ClientResponse.class),
       CommPhase(packets.CommPhase.class),
-      ServerHello(packets.ServerHello.class)
+      ServerHello(packets.ServerHello.class),
+      Ticket(packets.Ticket.class)
       ;
 
       
