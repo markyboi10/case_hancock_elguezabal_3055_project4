@@ -1,6 +1,8 @@
 package echoservice;
 
 import communication.Communication;
+import echoServiceCrypto.EchoDecryption;
+import echoServiceCrypto.EchoEncryption;
 import echoservice.config.Config;
 import java.io.FileNotFoundException;
 import java.net.Socket;
@@ -9,22 +11,44 @@ import java.util.Scanner;
 import java.io.PrintWriter;
 import java.io.IOException;
 import java.io.InvalidObjectException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
+import merrimackutil.json.types.JSONType;
+import merrimackutil.util.NonceCache;
 import merrimackutil.util.Tuple;
+import packets.CHAPChallenge;
+import packets.CHAPClaim;
+import packets.ClientHello;
 import packets.Packet;
+import packets.PacketType;
+import static packets.PacketType.ClientHello;
+import packets.ServerHello;
+import packets.Ticket;
 
 public class EchoService {
     
     private static Config config;  
     
     private static ServerSocket server;
+    
+    private static byte[] sessionKey;
+    private static byte[] EncNonce;
+    
+    private static NonceCache nc = new NonceCache(32,30);
 
-    public static void main(String[] args) throws FileNotFoundException, InvalidObjectException {
+    public static void main(String[] args) throws FileNotFoundException, InvalidObjectException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, IllegalBlockSizeException, InvalidAlgorithmParameterException, BadPaddingException {
         OptionParser op = new OptionParser(args);
         LongOption[] ar = new LongOption[2];
         ar[0] = new LongOption("config", true, 'c');
@@ -71,7 +95,7 @@ public class EchoService {
      *
      * @throws IOException
      */
-    private static void poll() throws IOException, NoSuchMethodException, NoSuchAlgorithmException {
+    private static void poll() throws IOException, NoSuchMethodException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, IllegalBlockSizeException, InvalidAlgorithmParameterException, BadPaddingException {
         while (true) { // Consistently accept connections
 
             // Establish the connection & read the message
@@ -85,6 +109,42 @@ public class EchoService {
             
             // Switch statement only goes over packets expected by the KDC, any other packet will be ignored.
             switch (packet.getType()) {
+
+                 case ClientHello:  {
+                    // Check if the user exists in the secretes && send a challenge back.
+                    ClientHello ClientHello_packet = (ClientHello) packet;
+                    String tkt = ClientHello_packet.getTkt();
+                    Ticket ticket = new Ticket(tkt, PacketType.Ticket);
+                    String nonce1 = ClientHello_packet.getNonce();
+                    
+                    ticket.geteSKey();
+                    ticket.getIv();
+     
+                    String serviceName = config.getService_name();
+                     String serviceSecret = config.getService_secret();
+                     ticket.getValidityTime();
+                     ticket.getCreateTime();
+       
+                    
+                    sessionKey =EchoDecryption.decrypt(ticket.geteSKey(),ticket.getIv(), serviceName,serviceSecret,ticket.getCreateTime(), ticket.getValidityTime(), ticket.getsName());
+                   
+                    System.out.println("EchoService session key: " + Arrays.toString( sessionKey));
+                    System.out.println(tkt);
+                    ticket.getsName();
+                    System.out.println(nonce1);
+                    
+                    //String stringSesKey = Base64.getEncoder().encodeToString(sessionKey);
+                    
+                    byte[] nonceBytes = nc.getNonce();
+                    String nonceString = Base64.getEncoder().encodeToString(nonceBytes);
+                    
+                    EncNonce = EchoEncryption.encrypt(sessionKey, nonce1, ticket.getValidityTime(), ticket.getCreateTime(), serviceName, ticket.getsName());
+                    
+                    // Create the packet and send
+                     ServerHello ServerHello_packet = new ServerHello(nonceString, serviceName, Base64.getEncoder().encodeToString(EchoEncryption.getRawIv()), Base64.getEncoder().encodeToString(EncNonce) );
+                     Communication.send(peer, ServerHello_packet);
+                }
+                break;
 
                 
             } 
