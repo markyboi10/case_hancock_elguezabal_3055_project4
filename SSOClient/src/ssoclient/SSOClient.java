@@ -43,6 +43,7 @@ public class SSOClient {
     private static String user;
     private static String service;
 
+    private static byte [] sessionKeyClient;
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException, NoSuchPaddingException {
 
         System.out.println("args: " + Arrays.toString(args));
@@ -105,6 +106,7 @@ public class SSOClient {
             // Runs the CHAP protocol
             // If chap returns true, run session key request
             if (CHAP()) {
+                SessionKeyRequest();
                 Ticket toSend = SessionKeyRequest();
                 Handshake(toSend);
                 //find kdcd address
@@ -200,7 +202,9 @@ public class SSOClient {
         System.out.println(sessKeyResp_Packet.getCreateTime());
         System.out.println(sessKeyResp_Packet.getsName());
         //alice's session key
-        byte[] skey = GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKeyAlice(), sessKeyResp_Packet.getuIv(), user, pw, sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getsName());
+
+        sessionKeyClient = GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKeyAlice(), sessKeyResp_Packet.getuIv(), user, pw, sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getsName());
+         System.out.println("Client session key: " + Arrays.toString( sessionKeyClient));
 
         //send a ticket
         return new Ticket(sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getuName(), sessKeyResp_Packet.getsName(), sessKeyResp_Packet.getIv(), sessKeyResp_Packet.geteSKey());
