@@ -20,6 +20,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     private static final PacketType PACKET_TYPE = PacketType.SessionKeyResponse;    
     
     // Packet Data
+    private String uIv;
     private String eSKeyAlice;
     private long createTime;
     private long validityTime;
@@ -30,6 +31,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
 
     /**
      * Default Constructor for a SessionKeyResponse
+     * @param uIv
      * @param eSKeyAlice
      * @param createTime
      * @param validityTime
@@ -38,7 +40,8 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
      * @param iv
      * @param eSKey 
      */
-    public SessionKeyResponse(String eSKeyAlice, long createTime, long validityTime, String uName, String sName, String iv, String eSKey) {
+    public SessionKeyResponse(String uIv, String eSKeyAlice, long createTime, long validityTime, String uName, String sName, String iv, String eSKey) {
+        this.uIv = uIv;
         this.eSKeyAlice = eSKeyAlice;
         this.createTime = createTime;
         this.validityTime = validityTime;
@@ -93,6 +96,14 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     public String getsName() {
         return sName;
     }
+
+    public String getuIv() {
+        return uIv;
+    }
+
+    public String getuName() {
+        return uName;
+    }
     
     
     /**
@@ -130,6 +141,11 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
         if (obj instanceof JSONObject)
           {
             tmp = (JSONObject)obj;
+            
+            if (tmp.containsKey("uIv"))
+              this.sName = tmp.getString("uIv");
+            else
+              throw new InvalidObjectException("Expected an Ticket object -- uIv expected.");
             
             if (tmp.containsKey("eSKeyAlice"))
               this.sName = tmp.getString("eSKeyAlice");
