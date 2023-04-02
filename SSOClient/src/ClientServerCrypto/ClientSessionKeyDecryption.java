@@ -45,7 +45,6 @@ public class ClientSessionKeyDecryption {
         try {
             // Put the cipher in encrypt mode with the specified key.
             aesCipher.init(Cipher.DECRYPT_MODE, sessKey2, new GCMParameterSpec(tagSize, Base64.getDecoder().decode(IV)));
-            aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
             aesCipher.updateAAD(serviceName.getBytes(StandardCharsets.UTF_8));
         } catch (InvalidKeyException | InvalidAlgorithmParameterException ex) {
             Logger.getLogger(ClientSessionKeyDecryption.class.getName()).log(Level.SEVERE, null, ex);
