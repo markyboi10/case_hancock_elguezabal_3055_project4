@@ -31,7 +31,7 @@ public class ClientHello implements Packet, JSONSerializable {
      */
     public ClientHello(String nonce, String tkt) {
         this.nonce = nonce;
-        this.tkt = tkt;
+        this.tkt = Base64.getEncoder().encodeToString(tkt.getBytes());
     }
 
     public String getNonce() {
@@ -39,7 +39,8 @@ public class ClientHello implements Packet, JSONSerializable {
     }
 
     public String getTkt() {
-        return tkt;
+        byte[] dec = Base64.getDecoder().decode(tkt);
+        return new String(dec);
     }
 
     /**
