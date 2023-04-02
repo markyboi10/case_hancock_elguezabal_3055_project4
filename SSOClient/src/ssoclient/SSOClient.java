@@ -18,47 +18,49 @@ import java.util.Objects;
 import javax.crypto.NoSuchPaddingException;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
+import merrimackutil.util.NonceCache;
 import merrimackutil.util.Tuple;
 import packets.CHAPChallenge;
 import packets.CHAPClaim;
 import packets.CHAPResponse;
 import packets.CHAPStatus;
+import packets.ClientHello;
 import static packets.PacketType.SessionKeyResponse;
 import packets.SessionKeyRequest;
 import packets.SessionKeyResponse;
+import packets.Ticket;
 import ssoclient.config.Config;
 import ssoclient.config.Host;
 
-
 public class SSOClient {
-   
+
     public static ArrayList<Host> hosts = new ArrayList<>();
     private static Config config;
-    private static String pw; 
-   
+    private static String pw;
+    private static NonceCache nc = new NonceCache(32, 30);
+
     // Command line variables
     private static String user;
     private static String service;
-    
+
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException, NoSuchPaddingException {
 
         System.out.println("args: " + Arrays.toString(args));
-        
+
         // Initializing the CLI
         boolean shortlen = false;
-        
+
         OptionParser op = new OptionParser(args);
         op.setLongAndShortOpts(new LongOption[]{
             new LongOption("hosts", true, 'h'),
             new LongOption("user", true, 'u'),
             new LongOption("service", true, 's')
         });
-       
+
         // op.setLongOpts(ar);
         op.setOptString("h:u:s:");
 
-        
-       Tuple<Character, String> opt = op.getLongOpt(false);
+        Tuple<Character, String> opt = op.getLongOpt(false);
         System.out.println(opt.getSecond());
         if (opt == null) {
             System.out.println("usage:\n"
@@ -94,57 +96,58 @@ public class SSOClient {
                 service = opt3.getSecond();
             }
         }
-        
+
         // Check the service type and operate such.
-        if(service.equalsIgnoreCase("echoservice")) { // KDC --> EchoService
-            
+        if (service.equalsIgnoreCase("echoservice")) { // KDC --> EchoService
+
             System.out.println("Running Chap.");
-            
+
             // Runs the CHAP protocol
             // If chap returns true, run session key request
             if (CHAP()) {
-                SessionKeyRequest();
+                Ticket toSend = SessionKeyRequest();
+                Handshake(toSend);
+                //find kdcd address
             } else { // If chap returns false
                 System.exit(0);
             }
 
         } else {
-            System.out.println("Service not found with name ["+service+"]. Closing program ");
+            System.out.println("Service not found with name [" + service + "]. Closing program ");
             System.exit(0);
         } // If we do the bonus then we add another condition here.
-        
-        
-       
+
     }
-    
+
     /**
      * Finds a host based off {@code host_name}
-     * @param host_name 
+     *
+     * @param host_name
      */
     private static Host getHost(String host_name) {
         return hosts.stream().filter(n -> n.getHost_name().equalsIgnoreCase(host_name)).findFirst().orElse(null);
     }
-    
+
     /**
-     * Runs the CHAP-modified for JSON protocol.
-     * All protocols should be ran on one single thread.
+     * Runs the CHAP-modified for JSON protocol. All protocols should be ran on
+     * one single thread.
+     *
      * @return boolean value on if the chap protocol finished correctly
      */
     private static boolean CHAP() throws IOException, NoSuchMethodException, NoSuchAlgorithmException {
-       
+
         Host host = getHost("kdcd");
-        
+
         // MESSAGE 1
         System.out.println("creating claim");
         CHAPClaim claim = new CHAPClaim(user); // Construct the packet
         System.out.println("sending packet");
         Socket peer1 = Communication.connectAndSend(host.getAddress(), host.getPort(), claim); // Send the packet
-               
-        
+
         System.out.println("reading packet");
         // MESSAGE 2
         CHAPChallenge chapChallenge_Packet = (CHAPChallenge) Communication.read(peer1); // Read for a packet  // KDC checks recieved hash by hashing its version of the password and nonce
-        
+
         // MESSAGE 3
         // Client sends hashed password and nonce
         //https://stackoverflow.com/questions/12076165/how-to-obscure-scanner-input-text
@@ -165,7 +168,7 @@ public class SSOClient {
         combined = digest.digest(combined);
         CHAPResponse response = new CHAPResponse(Base64.getEncoder().encodeToString(combined));
         Socket peer2 = Communication.connectAndSend(host.getAddress(), host.getPort(), response);
-        
+
         //MESSAGE 4
         //Receive the status message
         CHAPStatus chapStatus_Packet = (CHAPStatus) Communication.read(peer2);
@@ -173,33 +176,47 @@ public class SSOClient {
             System.out.println("Incorrect credentials");
             return false;
         }
-        
+
         System.out.println("GOT TO THE END! :)");
-        
+
         return true; // completed CHAP
-    }   
-    
-    private static boolean SessionKeyRequest() throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
+    }
+
+    private static Ticket SessionKeyRequest() throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
         Host host = getHost("kdcd");
-        
+
         // MESSAGE 1: Client sends kdc username and service name
         SessionKeyRequest req = new SessionKeyRequest(user, service); // Construct the packet
         Socket socket = Communication.connectAndSend(host.getAddress(), host.getPort(), req); // Send the packet
-        
-         // MESSAGE 2
+
+        // MESSAGE 2
         SessionKeyResponse sessKeyResp_Packet = (SessionKeyResponse) Communication.read(socket); // Read for a packet  // KDC checks username validity and if valid, demands password and gives a nonce
         System.out.println("IV");
-        System.out.println(sessKeyResp_Packet.getIv());
-        
+        System.out.println(sessKeyResp_Packet.getuIv());
+
         System.out.println("Session key");
-        System.out.println(sessKeyResp_Packet.geteSKey());
+        System.out.println(sessKeyResp_Packet.geteSKeyAlice());
         System.out.println(sessKeyResp_Packet.getValidityTime());
         System.out.println(sessKeyResp_Packet.getCreateTime());
         System.out.println(sessKeyResp_Packet.getsName());
-        
-        GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKey(), sessKeyResp_Packet.getIv(), user, pw, sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getsName());
+        //alice's session key
+        GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKeyAlice(), sessKeyResp_Packet.getuIv(), user, pw, sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getsName());
+
+        //send a ticket
+        return new Ticket(sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getuName(), sessKeyResp_Packet.getsName(), sessKeyResp_Packet.getIv(), sessKeyResp_Packet.geteSKey());
+    }
+
+    private static boolean Handshake(Ticket in) throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
+        //STEP 1: Client Hello
+        Host host = getHost("echoservice");
+        byte[] nonceBytes = nc.getNonce();
+        String nonce = Base64.getEncoder().encodeToString(nonceBytes);
+        String tkt = in.serialize();
+        // MESSAGE 1: Client sends echoservice nonce and ticket
+        ClientHello hi = new ClientHello(nonce, tkt); // Construct the packet
+        Socket socket = Communication.connectAndSend(host.getAddress(), host.getPort(), hi); // Send the packet
         
         return true;
     }
-    
+
 }
