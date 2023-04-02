@@ -20,6 +20,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
     private static final PacketType PACKET_TYPE = PacketType.SessionKeyResponse;    
     
     // Packet Data
+    private String eSKeyAlice;
     private long createTime;
     private long validityTime;
     private String uName;
@@ -29,6 +30,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
 
     /**
      * Default Constructor for a SessionKeyResponse
+     * @param eSKeyAlice
      * @param createTime
      * @param validityTime
      * @param uName
@@ -36,7 +38,8 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
      * @param iv
      * @param eSKey 
      */
-    public SessionKeyResponse(long createTime, long validityTime, String uName, String sName, String iv, String eSKey) {
+    public SessionKeyResponse(String eSKeyAlice, long createTime, long validityTime, String uName, String sName, String iv, String eSKey) {
+        this.eSKeyAlice = eSKeyAlice;
         this.createTime = createTime;
         this.validityTime = validityTime;
         this.uName = uName;
@@ -65,6 +68,10 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
 
     public void seteSKey(String eSKey) {
         this.eSKey = eSKey;
+    }
+
+    public String geteSKeyAlice() {
+        return eSKeyAlice;
     }
 
     public long getCreateTime() {
@@ -124,6 +131,11 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
           {
             tmp = (JSONObject)obj;
             
+            if (tmp.containsKey("eSKeyAlice"))
+              this.sName = tmp.getString("eSKeyAlice");
+            else
+              throw new InvalidObjectException("Expected an Ticket object -- eSKeyAlice expected.");
+            
             if (tmp.containsKey("createTime"))
               this.createTime = Long.parseLong(tmp.getString("createTime"));
             else
@@ -167,6 +179,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
         JSONObject object = new JSONObject();
         
         object.put("packetType", PACKET_TYPE.toString()); // MUST BE PRESENT FOR ALL PACKETS
+        object.put("eSKeyAlice", ""+this.eSKeyAlice);
         object.put("createTime", ""+this.createTime);
         object.put("validityTime", ""+this.validityTime);
         object.put("uName", this.uName);
