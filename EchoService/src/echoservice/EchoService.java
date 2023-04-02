@@ -119,7 +119,7 @@ public class EchoService {
 
                     // Config strings
                     String serviceName = config.getService_name();
-                    String serviceSecret = config.getService_secret();;
+                    String serviceSecret = config.getService_secret();
 
                     // Perform decryption with info from tkt, this gives us the session key
                     serverSidesessionKey = EchoTktDecryption.decrypt(ticket.geteSKey(), ticket.getIv(), serviceName, serviceSecret, ticket.getCreateTime(), ticket.getValidityTime(), ticket.getsName());
