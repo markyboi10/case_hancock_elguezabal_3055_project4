@@ -66,7 +66,7 @@ public class EchoEncryption {
         aesCipher.updateAAD(sName.getBytes(StandardCharsets.UTF_8));
         //encrypt the session key
         byte[] ciphertext = aesCipher.doFinal(sessKey2.getEncoded());
-        return new Tuple<byte[], byte[]>(ciphertext, rawIv);
+        return ciphertext;
         
     }
 
