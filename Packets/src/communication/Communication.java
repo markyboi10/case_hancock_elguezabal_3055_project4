@@ -28,6 +28,7 @@ import static packets.PacketType.SessionKeyResponse;
 import packets.ServerHello;
 import packets.SessionKeyRequest;
 import packets.SessionKeyResponse;
+import packets.Ticket;
 
 /**
  * Utility class used for sending packets across servers
@@ -110,6 +111,7 @@ public class Communication {
             case ClientResponse: return new ClientResponse(line, packetType); 
             case CommPhase: return new CommPhase(line, packetType); 
             case ServerHello: return new ServerHello(line, packetType); 
+            case Ticket: return new Ticket(line, packetType);
             default: return null;
         }    
         
