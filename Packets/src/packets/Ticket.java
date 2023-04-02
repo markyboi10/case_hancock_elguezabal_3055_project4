@@ -17,7 +17,7 @@ import merrimackutil.json.types.JSONType;
 public class Ticket implements Packet, JSONSerializable {
     
     // Packet Type
-    private static final PacketType PACKET_TYPE = PacketType.SessionKeyResponse;    
+    private static final PacketType PACKET_TYPE = PacketType.Ticket;    
     
     // Packet Data
     private long createTime;
