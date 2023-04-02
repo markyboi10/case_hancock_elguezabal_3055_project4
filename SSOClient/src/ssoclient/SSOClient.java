@@ -242,7 +242,7 @@ public class SSOClient {
          System.out.println("session key: " + Base64.getEncoder().encodeToString(sessionKeyClient));
         //Decrypt nonce c
         byte[] checkNonceCBytes = ClientSessionKeyDecryption.decrypt(ServerHello_Packet.geteSKey(), ServerHello_Packet.getIv(), user, sessionKeyClient, ServerHello_Packet.getsName());
-        if (checkNonceCBytes == nonceCBytes) {
+   
             // Get nonce S ready for encryption and add to cache
             String stringNonceS = ServerHello_Packet.getNonce();
             byte[] usedNonceSBytes = Base64.getDecoder().decode(stringNonceS);
@@ -253,24 +253,30 @@ public class SSOClient {
 
             // Encrypt nonce S
             byte[] encNonceS = ClientSessionKeyEncryption.encrypt(sessionKeyClient, stringNonceS, user, ServerHello_Packet.getsName());
+        
             // Packet everything together to send to echo server
             ClientResponse clientResponse_packet = new ClientResponse(nonceR, user, Base64.getEncoder().encodeToString(ClientSessionKeyEncryption.getRawIv()), Base64.getEncoder().encodeToString(encNonceS));
-
+        
             // Send packet off
-            Socket socket2 = Communication.connectAndSend(host.getAddress(), host.getPort(), clientResponse_packet);
+            Socket socket20 = Communication.connectAndSend(host.getAddress(), host.getPort(), clientResponse_packet);
 
+            System.out.println("PACKET SENT");
+        
+            
             //MESSAGE 4: Client recieves status
-            HandshakeStatus handshakeStatus_packet = (HandshakeStatus) Communication.read(socket2);
+            HandshakeStatus handshakeStatus_packet = (HandshakeStatus) Communication.read(socket20);
             // If message returns true
             if (handshakeStatus_packet.getMsg() == true) {
                 // Handshake protocol checks out
+                System.out.println("STATUS RECEIVED: TRUE");
                 return true;
             } else {
+                System.out.println("STATUS RECEIVED: FALSE");
                 //Otherwise false, exit system
                 System.exit(0);
             }
 
-        }
+        
         return false;
 
     }

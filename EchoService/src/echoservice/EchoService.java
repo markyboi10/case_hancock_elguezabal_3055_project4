@@ -140,13 +140,16 @@ public class EchoService {
                     // Create the packet and send
                     ServerHello ServerHello_packet = new ServerHello(nonceSString, serviceName, Base64.getEncoder().encodeToString(EchoSessionKeyEncryption.getRawIv()), Base64.getEncoder().encodeToString(EncNonceC));
                     Communication.send(peer, ServerHello_packet);
-                }
+                    System.out.println("packet sent");
+                };
                 break;
                 // Client Response package
                 case ClientResponse: {
                     //MESSAGE 4: Received client response, let's check nonce validity and give a status
                     ClientResponse ClientResponse_packet = (ClientResponse) packet;
 
+                    System.out.println("GOT TO CLIENT RESPSONSE");
+                    
                     //check nonce S is same
                     byte[] receivedNonceS = EchoSessionKeyDecryption.decrypt(ClientResponse_packet.geteSKey(), ClientResponse_packet.getIv(), ClientResponse_packet.getcName(), serverSidesessionKey);
 
@@ -163,7 +166,9 @@ public class EchoService {
 
                     }
 
-                }
+                }; break;
+                
+      
 
             }
         }
