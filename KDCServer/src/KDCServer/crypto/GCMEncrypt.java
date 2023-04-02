@@ -20,7 +20,23 @@ import merrimackutil.util.Tuple;
 
 public class GCMEncrypt {
 
-    public static Tuple<byte[], byte[]> encrypt(String mkey, long valTime, long createTime, String uName, String sName) throws
+    /**
+     * 
+     * @param mkey master scrypt
+     * @param valTime aad
+     * @param createTime aad
+     * @param uName aad
+     * @param sName aad
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchPaddingException
+     * @throws InvalidKeyException
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws InvalidAlgorithmParameterException
+     * @throws InvalidKeySpecException 
+     */
+    public static Tuple<byte[], byte[]> encrypt(String mkey, long valTime, long createTime, String uName, String sName, String user, SecretKey aesKey) throws
             NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException,
             BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
@@ -29,18 +45,8 @@ public class GCMEncrypt {
         // Set up an AES cipher object.
         Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
 
-        // Get a key generator object.
-        KeyGenerator aesKeyGen = KeyGenerator.getInstance("AES");
-
-        // Set the key size to 128 bits.
-        aesKeyGen.init(128);
-        
-        System.out.println("MKEY: " + mkey);
-
-        // Generate the session key.
-        SecretKey aesKey = aesKeyGen.generateKey();
         //generate the master key from the password.
-        SecretKey mKey = scrypt.genKey(mkey, uName);
+        SecretKey mKey = scrypt.genKey(mkey, user);
         System.out.println("SCRYPT ENCRYPT: " + mKey);
         // Generate the IV.
         SecureRandom rand = new SecureRandom();

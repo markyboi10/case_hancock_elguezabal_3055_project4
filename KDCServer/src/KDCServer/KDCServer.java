@@ -26,7 +26,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
 import merrimackutil.util.NonceCache;
@@ -47,7 +49,7 @@ public class KDCServer {
     private static Config config;
 
     private static ServerSocket server;
-    
+
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException {
 
         OptionParser op = new OptionParser(args);
@@ -79,7 +81,7 @@ public class KDCServer {
 
             // Accept packets & communicate
             poll();
-            
+
             // Close the socket when polling is completed or an error is thrown.
             server.close();
 
@@ -96,12 +98,11 @@ public class KDCServer {
         }
 
     }
-    
+
     // Gobal noncecache, holding nonces.
-    private static NonceCache nc = new NonceCache(32,30);
+    private static NonceCache nc = new NonceCache(32, 30);
     private static ArrayList<byte[]> nonceList = new ArrayList<>();
 
-    
     /**
      * Waits for a connection with a peer socket, then polls for a message being
      * sent. Each iteration of the loop operates for one message, as not to
@@ -118,9 +119,9 @@ public class KDCServer {
             // Determine the packet type.
             System.out.println("Waiting for a packet...");
             final Packet packet = Communication.read(peer);
-            
-            System.out.println("Packet Recieved: ["+packet.getType().name()+"]");
-            
+
+            System.out.println("Packet Recieved: [" + packet.getType().name() + "]");
+
             // Switch statement only goes over packets expected by the KDC, any other packet will be ignored.
             switch (packet.getType()) {
 
@@ -129,7 +130,6 @@ public class KDCServer {
                     CHAPClaim chapClaim_packet = (CHAPClaim) packet;
                     if (secrets.stream().anyMatch(n -> n.getUser().equalsIgnoreCase(chapClaim_packet.getuName()))) {
 
-
                         // Construct the nonce
                         byte[] nonceBytes = nc.getNonce();
                         nonceList.add(nonceBytes);
@@ -137,21 +137,21 @@ public class KDCServer {
                         //String s = [61, 49, 70, 95, -15, -97, 30, 49, -2, 33, -61, -14, 17, 32, 87, -68, 5, 114, -54, -118, -70, -83, 30, -41, -66, 83, 87, -61, -114, 68, 63, -17];
                         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
                         System.out.println("The original nonce, created by the server: " + nonce);
-                        
-                        
 
                         // Create the packet and send
                         CHAPChallenge chapChallenge_packet = new CHAPChallenge(nonce);
                         Communication.send(peer, chapChallenge_packet);
                     }
-                }; break;
-                
+                }
+                ;
+                break;
+
                 case CHAPResponse: {
                     CHAPResponse chapResponse_packet = (CHAPResponse) packet; // User's response to challenge, contains combined, hashed pass & nonce
 
                     // Decompile packet
                     String receivedHash = chapResponse_packet.getHash();
-                    
+
                     System.out.println("Received combined hash(base64): " + receivedHash);
 
                     // Standard SHA-256
@@ -196,7 +196,9 @@ public class KDCServer {
 
                         }
                     }
-                }; break;
+                }
+                ;
+                break;
 
                 case SessionKeyRequest: {
                     //String pw2 = "";
@@ -219,7 +221,6 @@ public class KDCServer {
                         if (secret.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getsName())) {
                             System.out.println("Secret pw associated with user: " + secret.getUser());
                             svcpw = secret.getSecret();
-                            user = secret.getUser();
                             sessionName = SessionKeyRequest_packet.getsName();
                             //sendSessionKey(user, sessionName, pw);
                             break;
@@ -228,9 +229,11 @@ public class KDCServer {
 
                     //SessionKeyResponse chapStatus_packet = new SessionKeyResponse(sendSessionKey(user, sessionName, pw));
                     Communication.send(peer, sendSessionKey(user, sessionName, pw, svcpw));
-                };break;
+                }
+                ;
+                break;
 
-            } 
+            }
         }
 
     }
@@ -238,12 +241,21 @@ public class KDCServer {
     //this is the part where session key is sent to client 
     private static SessionKeyResponse sendSessionKey(String uname, String sName, String pw, String svcpw) {
         //validity period comes from config file  
-        
+
         try {
             final long ctime = System.currentTimeMillis();
-            Tuple<byte[], byte[]> skeyiv = GCMEncrypt.encrypt(svcpw, config.getValidity_period(), ctime, sName, sName);
-            Tuple<byte[], byte[]> ukeyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName);
-            SessionKeyResponse toSend = new SessionKeyResponse(Base64.getEncoder().encodeToString(ukeyiv.getSecond()), Base64.getEncoder().encodeToString(ukeyiv.getFirst()) ,ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(skeyiv.getSecond()), Base64.getEncoder().encodeToString(skeyiv.getFirst()));
+
+            // Get a key generator object.
+            KeyGenerator aesKeyGen = KeyGenerator.getInstance("AES");
+
+            // Set the key size to 128 bits.
+            aesKeyGen.init(128);
+
+            // Generate the session key.
+            SecretKey aesKey = aesKeyGen.generateKey();
+            Tuple<byte[], byte[]> skeyiv = GCMEncrypt.encrypt(svcpw, config.getValidity_period(), ctime, sName, sName, sName, aesKey);
+            Tuple<byte[], byte[]> ukeyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName, uname, aesKey);
+            SessionKeyResponse toSend = new SessionKeyResponse(Base64.getEncoder().encodeToString(ukeyiv.getSecond()), Base64.getEncoder().encodeToString(ukeyiv.getFirst()), ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(skeyiv.getSecond()), Base64.getEncoder().encodeToString(skeyiv.getFirst()));
             //now we send!
             return toSend;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
@@ -253,5 +265,5 @@ public class KDCServer {
         return null;
 
     }
-    
+
 }

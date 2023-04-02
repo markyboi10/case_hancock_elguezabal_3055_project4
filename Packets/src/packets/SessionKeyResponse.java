@@ -143,12 +143,12 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
             tmp = (JSONObject)obj;
             
             if (tmp.containsKey("uIv"))
-              this.sName = tmp.getString("uIv");
+              this.uIv = tmp.getString("uIv");
             else
               throw new InvalidObjectException("Expected an Ticket object -- uIv expected.");
             
             if (tmp.containsKey("eSKeyAlice"))
-              this.sName = tmp.getString("eSKeyAlice");
+              this.eSKeyAlice = tmp.getString("eSKeyAlice");
             else
               throw new InvalidObjectException("Expected an Ticket object -- eSKeyAlice expected.");
             
@@ -195,6 +195,7 @@ public class SessionKeyResponse implements Packet, JSONSerializable {
         JSONObject object = new JSONObject();
         
         object.put("packetType", PACKET_TYPE.toString()); // MUST BE PRESENT FOR ALL PACKETS
+        object.put("uIv", ""+this.uIv);
         object.put("eSKeyAlice", ""+this.eSKeyAlice);
         object.put("createTime", ""+this.createTime);
         object.put("validityTime", ""+this.validityTime);
