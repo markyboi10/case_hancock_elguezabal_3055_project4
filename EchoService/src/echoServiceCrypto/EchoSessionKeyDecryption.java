@@ -2,10 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package ClientServerCrypto;
+package echoServiceCrypto;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -24,32 +23,30 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  *
- * @author MarkC
+ * @author Mark Case
  */
-public class GCMDecrypt {
-
-    public static byte[] decrypt(String ct, String IV, String uName, String mKey, long createTime, long valTime, String sessName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
+public class EchoSessionKeyDecryption {
+    
+            public static byte[] decrypt(String ct, String IV, String uName, byte[] sessKey) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
         //String masterPass = "";
-        System.out.println(mKey + valTime + createTime + uName + IV);
+
         int tagSize = 128; // 128-bit authentication tag.
-        SecretKey key = scrypt.genKey(mKey, uName);
-        //byte[] keyBytes = key.getEncoded();
-        System.out.println("SCRYPT DECRYPT: " + key);
+
 
         // Set up an AES cipher object.
         Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
 
+        SecretKey sessKey2 = new SecretKeySpec(sessKey, 0 , sessKey.length, "AES");
+        String encodedKey = Base64.getEncoder().encodeToString(sessKey2.getEncoded());
+        System.out.println("echo sess key 2: " + sessKey2);
         // Setup the key.
         //SecretKeySpec aesKey = new SecretKeySpec(keyBytes, "AES");
         try {
             // Put the cipher in encrypt mode with the specified key.
-            aesCipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(tagSize, Base64.getDecoder().decode(IV)));
-            aesCipher.updateAAD(longToBytes(createTime));
-            aesCipher.updateAAD(longToBytes(valTime));
+            aesCipher.init(Cipher.DECRYPT_MODE, sessKey2, new GCMParameterSpec(tagSize, Base64.getDecoder().decode(IV)));
             aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
-            aesCipher.updateAAD(sessName.getBytes(StandardCharsets.UTF_8));
         } catch (InvalidKeyException | InvalidAlgorithmParameterException ex) {
-            Logger.getLogger(GCMDecrypt.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EchoSessionKeyDecryption.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Finalize the message.
@@ -57,15 +54,12 @@ public class GCMDecrypt {
         try {
             plaintext = aesCipher.doFinal(Base64.getDecoder().decode(ct));
         } catch (IllegalBlockSizeException | BadPaddingException ex) {
-            Logger.getLogger(GCMDecrypt.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EchoSessionKeyDecryption.class.getName()).log(Level.SEVERE, null, ex);
         }
         return plaintext;
 
     } // End 'decrypt' method
 
-    private static byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
-    }
+
+    
 }

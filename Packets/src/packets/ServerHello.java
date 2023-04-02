@@ -119,7 +119,7 @@ public class ServerHello implements Packet, JSONSerializable {
             }
 
             if (tmp.containsKey("eSKey")) {
-                this.iv = tmp.getString("eSKey");
+                this.eSKey = tmp.getString("eSKey");
             } else {
                 throw new InvalidObjectException("Expected an Ticket object -- eSKey (String) expected.");
             }

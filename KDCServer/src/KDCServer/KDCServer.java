@@ -7,7 +7,7 @@ package KDCServer;
 import KDCServer.config.Config;
 import KDCServer.config.Secrets;
 import KDCServer.config.SecretsConfig;
-import KDCServer.crypto.GCMEncrypt;
+import KDCServer.crypto.ServerMasterKeyEncryption;
 import communication.Communication;
 import java.io.FileNotFoundException;
 import java.net.Socket;
@@ -253,8 +253,8 @@ public class KDCServer {
 
             // Generate the session key.
             SecretKey aesKey = aesKeyGen.generateKey();
-            Tuple<byte[], byte[]> skeyiv = GCMEncrypt.encrypt(svcpw, config.getValidity_period(), ctime, sName, sName, sName, aesKey);
-            Tuple<byte[], byte[]> ukeyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName, uname, aesKey);
+            Tuple<byte[], byte[]> skeyiv = ServerMasterKeyEncryption.encrypt(svcpw, config.getValidity_period(), ctime, sName, sName, sName, aesKey);
+            Tuple<byte[], byte[]> ukeyiv = ServerMasterKeyEncryption.encrypt(pw, config.getValidity_period(), ctime, uname, sName, uname, aesKey);
             SessionKeyResponse toSend = new SessionKeyResponse(Base64.getEncoder().encodeToString(ukeyiv.getSecond()), Base64.getEncoder().encodeToString(ukeyiv.getFirst()), ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(skeyiv.getSecond()), Base64.getEncoder().encodeToString(skeyiv.getFirst()));
             //now we send!
             return toSend;

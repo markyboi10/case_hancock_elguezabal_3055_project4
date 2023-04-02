@@ -18,7 +18,7 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKey;
 import merrimackutil.util.Tuple;
 
-public class GCMEncrypt {
+public class ServerMasterKeyEncryption {
 
     /**
      * 

@@ -1,15 +1,14 @@
 package ssoclient;
 
-import ClientServerCrypto.GCMDecrypt;
-import ClientServerCrypto.SessKeyDecryption;
-import ClientServerCrypto.SessKeyEncryption;
+import ClientServerCrypto.ClientMasterKeyDecryption;
+import ClientServerCrypto.ClientSessionKeyDecryption;
+import ClientServerCrypto.ClientSessionKeyEncryption;
 import communication.Communication;
 import java.io.Console;
 import java.io.FileNotFoundException;
 import java.net.Socket;
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -30,10 +29,9 @@ import packets.CHAPChallenge;
 import packets.CHAPClaim;
 import packets.CHAPResponse;
 import packets.CHAPStatus;
+import packets.HandshakeStatus;
 import packets.ClientHello;
 import packets.ClientResponse;
-import static packets.PacketType.ServerHello;
-import static packets.PacketType.SessionKeyResponse;
 import packets.ServerHello;
 import packets.SessionKeyRequest;
 import packets.SessionKeyResponse;
@@ -47,13 +45,11 @@ public class SSOClient {
     private static Config config;
     private static String pw;
     private static NonceCache nc = new NonceCache(32, 30);
-
-    private static byte[] nonceS;
     // Command line variables
     private static String user;
     private static String service;
+    private static byte[] sessionKeyClient;
 
-    private static byte [] sessionKeyClient;
     public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 
         System.out.println("args: " + Arrays.toString(args));
@@ -213,46 +209,70 @@ public class SSOClient {
         System.out.println(sessKeyResp_Packet.getsName());
         //alice's session key
 
-        sessionKeyClient = GCMDecrypt.decrypt(sessKeyResp_Packet.geteSKeyAlice(), sessKeyResp_Packet.getuIv(), user, pw, sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getsName());
-         System.out.println("Client session key: " + Arrays.toString( sessionKeyClient));
+        sessionKeyClient = ClientMasterKeyDecryption.decrypt(sessKeyResp_Packet.geteSKeyAlice(), sessKeyResp_Packet.getuIv(), user, pw, sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getsName());
+        System.out.println("Client session key: " + Arrays.toString(sessionKeyClient));
 
         //send a ticket
         return new Ticket(sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getuName(), sessKeyResp_Packet.getsName(), sessKeyResp_Packet.getIv(), sessKeyResp_Packet.geteSKey());
     }
 
     private static boolean Handshake(Ticket in) throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-        //STEP 1: Client Hello
+        //Client connects to echoservice
         Host host = getHost("echoservice");
-        byte[] nonceBytes = nc.getNonce();
-       
-        String nonce = Base64.getEncoder().encodeToString(nonceBytes);
+
+        // Get fresh nonce C
+        byte[] nonceCBytes = nc.getNonce();
+        // Convert nonceCBytes to Base64 string format
+        String nonceC = Base64.getEncoder().encodeToString(nonceCBytes);
+
+        // Serialize ticket that we will send
         String tkt = in.serialize();
-        // MESSAGE 1: Client sends echoservice nonce and ticket
-        ClientHello hi = new ClientHello(nonce, tkt); // Construct the packet
+
+        // MESSAGE 1: Client sends echoservice the nonce C and ticket
+        ClientHello hi = new ClientHello(nonceC, tkt); // Construct the packet
         Socket socket = Communication.connectAndSend(host.getAddress(), host.getPort(), hi); // Send the packet
-        
-        //MESSAGE 3
+
+        //MESSAGE 3: Recieved the server hello
         ServerHello ServerHello_Packet = (ServerHello) Communication.read(socket);
-        ServerHello_Packet.geteSKey();
-        ServerHello_Packet.getIv();
-        ServerHello_Packet.getsName();
-        
-        
-        //decrypt nonce s
-        nonceS = SessKeyDecryption.decrypt(ServerHello_Packet.geteSKey(), ServerHello_Packet.getIv(), user,sessionKeyClient,ServerHello_Packet.getsName());
-        String stringNonceS = Base64.getEncoder().encodeToString(nonceS);
-        byte[] nonceBytesR = nc.getNonce();
-        String nonceR = Base64.getEncoder().encodeToString(nonceBytesR);
-        
-        byte[] endNonce = SessKeyEncryption.encrypt(sessionKeyClient, stringNonceS, user, ServerHello_Packet.getsName());
-        ClientResponse cr = new ClientResponse(nonceR, user, Base64.getEncoder().encodeToString(SessKeyEncryption.getRawIv()), Base64.getEncoder().encodeToString(endNonce));
-        
-        Socket socket2 = Communication.connectAndSend(host.getAddress(), host.getPort(), cr);
-        
-        
-        
-        
-        return true;
+
+        System.out.println("ct: " + ServerHello_Packet.geteSKey());
+        System.out.println("iv: " + ServerHello_Packet.getIv());
+        System.out.println("user: " + user);
+        System.out.println("session name : " + ServerHello_Packet.getsName());    
+         System.out.println("session key: " + Base64.getEncoder().encodeToString(sessionKeyClient));
+        //Decrypt nonce c
+        byte[] checkNonceCBytes = ClientSessionKeyDecryption.decrypt(ServerHello_Packet.geteSKey(), ServerHello_Packet.getIv(), user, sessionKeyClient, ServerHello_Packet.getsName());
+        if (checkNonceCBytes == nonceCBytes) {
+            // Get nonce S ready for encryption and add to cache
+            String stringNonceS = ServerHello_Packet.getNonce();
+            byte[] usedNonceSBytes = Base64.getDecoder().decode(stringNonceS);
+            nc.addNonce(usedNonceSBytes);
+            // Fresh nonce R
+            byte[] nonceBytesR = nc.getNonce();
+            String nonceR = Base64.getEncoder().encodeToString(nonceBytesR);
+
+            // Encrypt nonce S
+            byte[] encNonceS = ClientSessionKeyEncryption.encrypt(sessionKeyClient, stringNonceS, user, ServerHello_Packet.getsName());
+            // Packet everything together to send to echo server
+            ClientResponse clientResponse_packet = new ClientResponse(nonceR, user, Base64.getEncoder().encodeToString(ClientSessionKeyEncryption.getRawIv()), Base64.getEncoder().encodeToString(encNonceS));
+
+            // Send packet off
+            Socket socket2 = Communication.connectAndSend(host.getAddress(), host.getPort(), clientResponse_packet);
+
+            //MESSAGE 4: Client recieves status
+            HandshakeStatus handshakeStatus_packet = (HandshakeStatus) Communication.read(socket2);
+            // If message returns true
+            if (handshakeStatus_packet.getMsg() == true) {
+                // Handshake protocol checks out
+                return true;
+            } else {
+                //Otherwise false, exit system
+                System.exit(0);
+            }
+
+        }
+        return false;
+
     }
 
 }

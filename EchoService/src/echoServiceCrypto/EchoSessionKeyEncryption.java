@@ -2,30 +2,33 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package ClientServerCrypto;
+package echoServiceCrypto;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import merrimackutil.util.Tuple;
 
 /**
  *
  * @author Mark Case
  */
-public class SessKeyEncryption {
-    
+public class EchoSessionKeyEncryption {
     public static byte[] rawIv;
-    public static byte[] encrypt(byte[] sessKey, String nonce, String uName, String sName) throws
+    public static byte[] encrypt(byte[] sessKey, String nonce, long valTime, long createTime, String uName, String sName) throws
             NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidKeyException, IllegalBlockSizeException,
             BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
@@ -57,6 +60,8 @@ public class SessKeyEncryption {
 
         // Put the cipher in encrypt mode with the specified key.
         aesCipher.init(Cipher.ENCRYPT_MODE, sessKey2, gcmParams);
+        aesCipher.updateAAD(longToBytes(createTime));
+        aesCipher.updateAAD(longToBytes(valTime));
         aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
         aesCipher.updateAAD(sName.getBytes(StandardCharsets.UTF_8));
         //encrypt the session key
@@ -69,5 +74,10 @@ public class SessKeyEncryption {
         return rawIv;
     }
 
+    private static byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
     
 }

@@ -25,7 +25,7 @@ import javax.crypto.spec.GCMParameterSpec;
  *
  * @author Mark Case
  */
-public class EchoDecryption {
+public class EchoTktDecryption {
     
         public static byte[] decrypt(String ct, String IV, String uName, String mKey, long createTime, long valTime, String sessName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
         //String masterPass = "";
@@ -48,7 +48,7 @@ public class EchoDecryption {
             aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
             aesCipher.updateAAD(sessName.getBytes(StandardCharsets.UTF_8));
         } catch (InvalidKeyException | InvalidAlgorithmParameterException ex) {
-            Logger.getLogger(EchoDecryption.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EchoTktDecryption.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Finalize the message.
@@ -56,7 +56,7 @@ public class EchoDecryption {
         try {
             plaintext = aesCipher.doFinal(Base64.getDecoder().decode(ct));
         } catch (IllegalBlockSizeException | BadPaddingException ex) {
-            Logger.getLogger(EchoDecryption.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EchoTktDecryption.class.getName()).log(Level.SEVERE, null, ex);
         }
         return plaintext;
 

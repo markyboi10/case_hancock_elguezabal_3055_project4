@@ -26,7 +26,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author Mark Case
  */
-public class SessKeyDecryption {
+public class ClientSessionKeyDecryption {
         
         public static byte[] decrypt(String ct, String IV, String uName, byte[] sessKey, String serviceName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
         //String masterPass = "";
@@ -38,6 +38,8 @@ public class SessKeyDecryption {
         Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
 
         SecretKey sessKey2 = new SecretKeySpec(sessKey, 0 , sessKey.length, "AES");
+        
+        System.out.println("client sess key 2: " + sessKey2);
         // Setup the key.
         //SecretKeySpec aesKey = new SecretKeySpec(keyBytes, "AES");
         try {
@@ -46,7 +48,7 @@ public class SessKeyDecryption {
             aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
             aesCipher.updateAAD(serviceName.getBytes(StandardCharsets.UTF_8));
         } catch (InvalidKeyException | InvalidAlgorithmParameterException ex) {
-            Logger.getLogger(SessKeyDecryption.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ClientSessionKeyDecryption.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         // Finalize the message.
@@ -54,7 +56,7 @@ public class SessKeyDecryption {
         try {
             plaintext = aesCipher.doFinal(Base64.getDecoder().decode(ct));
         } catch (IllegalBlockSizeException | BadPaddingException ex) {
-            Logger.getLogger(SessKeyDecryption.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ClientSessionKeyDecryption.class.getName()).log(Level.SEVERE, null, ex);
         }
         return plaintext;
 

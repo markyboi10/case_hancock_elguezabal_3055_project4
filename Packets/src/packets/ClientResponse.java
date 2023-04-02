@@ -40,6 +40,28 @@ public class ClientResponse implements Packet, JSONSerializable {
         this.eSKey = eSKey;
     }
 
+    public static PacketType getPACKET_TYPE() {
+        return PACKET_TYPE;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public String getcName() {
+        return cName;
+    }
+
+    public String getIv() {
+        return iv;
+    }
+
+    public String geteSKey() {
+        return eSKey;
+    }
+    
+    
+
     /**
      * Converts a JSONObject into a ticket object
      *
