@@ -204,6 +204,7 @@ public class KDCServer {
                     String sessionName = "";
                     String user = "";
                     String pw = "";
+                    String svcpw = "";
                     for (Secrets secret : secrets) {
                         if (secret.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getuName())) {
                             System.out.println("Secret pw associated with user: " + secret.getUser());
@@ -214,9 +215,19 @@ public class KDCServer {
                             break;
                         }
                     }
+                    for (Secrets secret : secrets) {
+                        if (secret.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getsName())) {
+                            System.out.println("Secret pw associated with user: " + secret.getUser());
+                            svcpw = secret.getSecret();
+                            user = secret.getUser();
+                            sessionName = SessionKeyRequest_packet.getsName();
+                            //sendSessionKey(user, sessionName, pw);
+                            break;
+                        }
+                    }
 
                     //SessionKeyResponse chapStatus_packet = new SessionKeyResponse(sendSessionKey(user, sessionName, pw));
-                    Communication.send(peer, sendSessionKey(user, sessionName, pw));
+                    Communication.send(peer, sendSessionKey(user, sessionName, pw, svcpw));
                 };break;
 
             } 
@@ -225,13 +236,14 @@ public class KDCServer {
     }
 
     //this is the part where session key is sent to client 
-    private static SessionKeyResponse sendSessionKey(String uname, String sName, String pw) {
+    private static SessionKeyResponse sendSessionKey(String uname, String sName, String pw, String svcpw) {
         //validity period comes from config file  
         
         try {
             final long ctime = System.currentTimeMillis();
-            Tuple<byte[], byte[]> keyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName);
-            SessionKeyResponse toSend = new SessionKeyResponse(ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(keyiv.getSecond()), Base64.getEncoder().encodeToString(keyiv.getFirst()));
+            Tuple<byte[], byte[]> skeyiv = GCMEncrypt.encrypt(svcpw, config.getValidity_period(), ctime, sName, sName);
+            Tuple<byte[], byte[]> ukeyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName);
+            SessionKeyResponse toSend = new SessionKeyResponse(Base64.getEncoder().encodeToString(ukeyiv.getSecond()), Base64.getEncoder().encodeToString(ukeyiv.getFirst()) ,ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(skeyiv.getSecond()), Base64.getEncoder().encodeToString(skeyiv.getFirst()));
             //now we send!
             return toSend;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException ex) {
