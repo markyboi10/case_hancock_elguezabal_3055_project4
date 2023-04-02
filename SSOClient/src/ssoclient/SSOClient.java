@@ -1,6 +1,7 @@
 package ssoclient;
 
 import ClientServerCrypto.GCMDecrypt;
+import ClientServerCrypto.SessKeyDecryption;
 import communication.Communication;
 import java.io.Console;
 import java.io.FileNotFoundException;
@@ -25,7 +26,9 @@ import packets.CHAPClaim;
 import packets.CHAPResponse;
 import packets.CHAPStatus;
 import packets.ClientHello;
+import static packets.PacketType.ServerHello;
 import static packets.PacketType.SessionKeyResponse;
+import packets.ServerHello;
 import packets.SessionKeyRequest;
 import packets.SessionKeyResponse;
 import packets.Ticket;
@@ -39,6 +42,7 @@ public class SSOClient {
     private static String pw;
     private static NonceCache nc = new NonceCache(32, 30);
 
+    private static byte[] nonceS;
     // Command line variables
     private static String user;
     private static String service;
@@ -214,11 +218,28 @@ public class SSOClient {
         //STEP 1: Client Hello
         Host host = getHost("echoservice");
         byte[] nonceBytes = nc.getNonce();
+       
         String nonce = Base64.getEncoder().encodeToString(nonceBytes);
         String tkt = in.serialize();
         // MESSAGE 1: Client sends echoservice nonce and ticket
         ClientHello hi = new ClientHello(nonce, tkt); // Construct the packet
         Socket socket = Communication.connectAndSend(host.getAddress(), host.getPort(), hi); // Send the packet
+        
+        //MESSAGE 3
+        ServerHello ServerHello_Packet = (ServerHello) Communication.read(socket);
+        ServerHello_Packet.geteSKey();
+        ServerHello_Packet.getIv();
+        ServerHello_Packet.getsName();
+        
+        
+        //decrypt nonce s
+        nonceS = SessKeyDecryption.decrypt(ServerHello_Packet.geteSKey(), ServerHello_Packet.getIv(), user,sessionKeyClient,ServerHello_Packet.getsName());
+        
+        byte[] nonceBytesR = nc.getNonce();
+        String nonceR = Base64.getEncoder().encodeToString(nonceBytesR);
+        
+        
+        
         
         return true;
     }

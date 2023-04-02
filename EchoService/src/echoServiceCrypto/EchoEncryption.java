@@ -36,7 +36,7 @@ public class EchoEncryption {
         int tagSize = 128;
         // Set up an AES cipher object.
         Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
-        sessKey = Base64.getDecoder().decode(sessKey);
+        //sessKey = Base64.getDecoder().decode(sessKey);
         SecretKey sessKey2 = new SecretKeySpec(sessKey, 0 , sessKey.length, "AES");
         // Get a key generator object.
         //KeyGenerator aesKeyGen = KeyGenerator.getInstance("AES");

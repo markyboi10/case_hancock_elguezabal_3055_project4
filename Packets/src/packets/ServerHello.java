@@ -51,6 +51,28 @@ public class ServerHello implements Packet, JSONSerializable {
         recieve(packet);
     }
 
+    public static PacketType getPACKET_TYPE() {
+        return PACKET_TYPE;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public String getsName() {
+        return sName;
+    }
+
+    public String getIv() {
+        return iv;
+    }
+
+    public String geteSKey() {
+        return eSKey;
+    }
+
+    
+    
     /**
      * JSONSerializable implementations
      */

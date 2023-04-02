@@ -111,12 +111,16 @@ public class EchoService {
             switch (packet.getType()) {
 
                  case ClientHello:  {
+                     
+                     // MESSAGE 2
                     // Check if the user exists in the secretes && send a challenge back.
                     ClientHello ClientHello_packet = (ClientHello) packet;
                     String tkt = ClientHello_packet.getTkt();
                     Ticket ticket = new Ticket(tkt, PacketType.Ticket);
                     String nonce1 = ClientHello_packet.getNonce();
+                    byte[] usedNonce1 = Base64.getDecoder().decode(nonce1);
                     
+                    nc.addNonce(usedNonce1);
                     ticket.geteSKey();
                     ticket.getIv();
      
