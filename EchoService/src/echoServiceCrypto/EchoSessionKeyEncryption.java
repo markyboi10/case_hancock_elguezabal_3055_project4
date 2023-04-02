@@ -60,9 +60,6 @@ public class EchoSessionKeyEncryption {
 
         // Put the cipher in encrypt mode with the specified key.
         aesCipher.init(Cipher.ENCRYPT_MODE, sessKey2, gcmParams);
-        aesCipher.updateAAD(longToBytes(createTime));
-        aesCipher.updateAAD(longToBytes(valTime));
-        aesCipher.updateAAD(uName.getBytes(StandardCharsets.UTF_8));
         aesCipher.updateAAD(sName.getBytes(StandardCharsets.UTF_8));
         //encrypt the session key
         byte[] ciphertext = aesCipher.doFinal(sessKey2.getEncoded());
