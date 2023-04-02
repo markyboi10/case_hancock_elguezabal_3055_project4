@@ -219,7 +219,6 @@ public class KDCServer {
                         if (secret.getUser().equalsIgnoreCase(SessionKeyRequest_packet.getsName())) {
                             System.out.println("Secret pw associated with user: " + secret.getUser());
                             svcpw = secret.getSecret();
-                            user = secret.getUser();
                             sessionName = SessionKeyRequest_packet.getsName();
                             //sendSessionKey(user, sessionName, pw);
                             break;
@@ -241,8 +240,8 @@ public class KDCServer {
         
         try {
             final long ctime = System.currentTimeMillis();
-            Tuple<byte[], byte[]> skeyiv = GCMEncrypt.encrypt(svcpw, config.getValidity_period(), ctime, sName, sName);
-            Tuple<byte[], byte[]> ukeyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName);
+            Tuple<byte[], byte[]> skeyiv = GCMEncrypt.encrypt(svcpw, config.getValidity_period(), ctime, sName, sName, sName);
+            Tuple<byte[], byte[]> ukeyiv = GCMEncrypt.encrypt(pw, config.getValidity_period(), ctime, uname, sName, uname);
             SessionKeyResponse toSend = new SessionKeyResponse(Base64.getEncoder().encodeToString(ukeyiv.getSecond()), Base64.getEncoder().encodeToString(ukeyiv.getFirst()) ,ctime, config.getValidity_period(), uname, sName, Base64.getEncoder().encodeToString(skeyiv.getSecond()), Base64.getEncoder().encodeToString(skeyiv.getFirst()));
             //now we send!
             return toSend;
