@@ -2,6 +2,7 @@ package ssoclient;
 
 import ClientServerCrypto.GCMDecrypt;
 import ClientServerCrypto.SessKeyDecryption;
+import ClientServerCrypto.SessKeyEncryption;
 import communication.Communication;
 import java.io.Console;
 import java.io.FileNotFoundException;
@@ -9,6 +10,8 @@ import java.net.Socket;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -16,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import merrimackutil.cli.LongOption;
 import merrimackutil.cli.OptionParser;
@@ -26,6 +31,7 @@ import packets.CHAPClaim;
 import packets.CHAPResponse;
 import packets.CHAPStatus;
 import packets.ClientHello;
+import packets.ClientResponse;
 import static packets.PacketType.ServerHello;
 import static packets.PacketType.SessionKeyResponse;
 import packets.ServerHello;
@@ -48,7 +54,7 @@ public class SSOClient {
     private static String service;
 
     private static byte [] sessionKeyClient;
-    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException, NoSuchPaddingException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, FileNotFoundException, InvalidObjectException, IOException, NoSuchMethodException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 
         System.out.println("args: " + Arrays.toString(args));
 
@@ -214,7 +220,7 @@ public class SSOClient {
         return new Ticket(sessKeyResp_Packet.getCreateTime(), sessKeyResp_Packet.getValidityTime(), sessKeyResp_Packet.getuName(), sessKeyResp_Packet.getsName(), sessKeyResp_Packet.getIv(), sessKeyResp_Packet.geteSKey());
     }
 
-    private static boolean Handshake(Ticket in) throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException {
+    private static boolean Handshake(Ticket in) throws IOException, NoSuchMethodException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
         //STEP 1: Client Hello
         Host host = getHost("echoservice");
         byte[] nonceBytes = nc.getNonce();
@@ -234,9 +240,14 @@ public class SSOClient {
         
         //decrypt nonce s
         nonceS = SessKeyDecryption.decrypt(ServerHello_Packet.geteSKey(), ServerHello_Packet.getIv(), user,sessionKeyClient,ServerHello_Packet.getsName());
-        
+        String stringNonceS = Base64.getEncoder().encodeToString(nonceS);
         byte[] nonceBytesR = nc.getNonce();
         String nonceR = Base64.getEncoder().encodeToString(nonceBytesR);
+        
+        byte[] endNonce = SessKeyEncryption.encrypt(sessionKeyClient, stringNonceS, user, ServerHello_Packet.getsName());
+        ClientResponse cr = new ClientResponse(nonceR, user, Base64.getEncoder().encodeToString(SessKeyEncryption.getRawIv()), Base64.getEncoder().encodeToString(endNonce));
+        
+        Socket socket2 = Communication.connectAndSend(host.getAddress(), host.getPort(), cr);
         
         
         

@@ -31,6 +31,7 @@ import merrimackutil.util.Tuple;
 import packets.CHAPChallenge;
 import packets.CHAPClaim;
 import packets.ClientHello;
+import packets.ClientResponse;
 import packets.Packet;
 import packets.PacketType;
 import static packets.PacketType.ClientHello;
@@ -147,8 +148,13 @@ public class EchoService {
                     // Create the packet and send
                      ServerHello ServerHello_packet = new ServerHello(nonceString, serviceName, Base64.getEncoder().encodeToString(EchoEncryption.getRawIv()), Base64.getEncoder().encodeToString(EncNonce) );
                      Communication.send(peer, ServerHello_packet);
-                }
+                };
                 break;
+                 case ClientResponse: {
+                     ClientResponse ClientResponse_packet = (ClientResponse) packet;
+                     
+                     //check nonce if same
+                 }
 
                 
             } 
