@@ -25,7 +25,7 @@ import merrimackutil.json.types.JSONType;
 public class HandshakeStatus implements Packet, JSONSerializable {
         
     // Packet Type
-    private static final PacketType PACKET_TYPE = PacketType.CHAPStatus;
+    private static final PacketType PACKET_TYPE = PacketType.HandshakeStatus;
     
     // Packet Data
     private boolean msg;

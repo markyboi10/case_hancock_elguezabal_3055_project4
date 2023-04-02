@@ -161,7 +161,7 @@ public class SSOClient {
         //https://stackoverflow.com/questions/12076165/how-to-obscure-scanner-input-text
         //https://stackoverflow.com/questions/5683486/how-to-combine-two-byte-arrays
         Console console = System.console();
-        pw = new String(console.readPassword("KDC Password: "));
+        pw = new String("password");
         //Concatenate Password+Nonce and hash
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] clientHashPass = Base64.getDecoder().decode(pw);
@@ -242,9 +242,10 @@ public class SSOClient {
          System.out.println("session key: " + Base64.getEncoder().encodeToString(sessionKeyClient));
         //Decrypt nonce c
         byte[] checkNonceCBytes = ClientSessionKeyDecryption.decrypt(ServerHello_Packet.geteSKey(), ServerHello_Packet.getIv(), user, sessionKeyClient, ServerHello_Packet.getsName());
-        if (checkNonceCBytes == nonceCBytes) {
+        if (Arrays.equals(checkNonceCBytes, nonceCBytes)) {
             // Get nonce S ready for encryption and add to cache
             String stringNonceS = ServerHello_Packet.getNonce();
+            System.out.println(stringNonceS);
             byte[] usedNonceSBytes = Base64.getDecoder().decode(stringNonceS);
             nc.addNonce(usedNonceSBytes);
             // Fresh nonce R
@@ -252,18 +253,18 @@ public class SSOClient {
             String nonceR = Base64.getEncoder().encodeToString(nonceBytesR);
 
             // Encrypt nonce S
-            byte[] encNonceS = ClientSessionKeyEncryption.encrypt(sessionKeyClient, stringNonceS, user, ServerHello_Packet.getsName());
+            byte[] encNonceS = ClientSessionKeyEncryption.encrypt(sessionKeyClient, usedNonceSBytes, user, ServerHello_Packet.getsName());
             // Packet everything together to send to echo server
             ClientResponse clientResponse_packet = new ClientResponse(nonceR, user, Base64.getEncoder().encodeToString(ClientSessionKeyEncryption.getRawIv()), Base64.getEncoder().encodeToString(encNonceS));
 
             // Send packet off
             Socket socket2 = Communication.connectAndSend(host.getAddress(), host.getPort(), clientResponse_packet);
-
             //MESSAGE 4: Client recieves status
             HandshakeStatus handshakeStatus_packet = (HandshakeStatus) Communication.read(socket2);
             // If message returns true
             if (handshakeStatus_packet.getMsg() == true) {
                 // Handshake protocol checks out
+                System.out.println("done");
                 return true;
             } else {
                 //Otherwise false, exit system

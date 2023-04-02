@@ -131,8 +131,8 @@ public class EchoService {
                     String nonceSString = Base64.getEncoder().encodeToString(nonceSBytes);
 
                     // Encrypt nonce C 
-                    byte[] EncNonceC = EchoSessionKeyEncryption.encrypt(serverSidesessionKey, usedNonceC, ticket.getValidityTime(), ticket.getCreateTime(), serviceName, ticket.getsName());
-
+                    byte[] EncNonceC = EchoSessionKeyEncryption.encrypt(serverSidesessionKey, bytesUsedNonceC, ticket.getValidityTime(), ticket.getCreateTime(), serviceName, ticket.getsName());
+                    System.out.println(nonceSString);
                     System.out.println("ct: " +  Base64.getEncoder().encodeToString(EncNonceC));
                     System.out.println("iv: " + Base64.getEncoder().encodeToString(EchoSessionKeyEncryption.getRawIv()));
                     System.out.println("session name : " + serviceName);
@@ -149,7 +149,7 @@ public class EchoService {
 
                     //check nonce S is same
                     byte[] receivedNonceS = EchoSessionKeyDecryption.decrypt(ClientResponse_packet.geteSKey(), ClientResponse_packet.getIv(), ClientResponse_packet.getcName(), serverSidesessionKey);
-
+                    System.out.println(Base64.getEncoder().encodeToString(receivedNonceS));
                     if (nc.containsNonce(receivedNonceS)) {
                         System.out.println("Nonce matched");
                         handshakeStatus = true; // set status true
